@@ -6,3 +6,5 @@ examples/.DS_Store
 *.class
 src/tools/.DS_Store
 /bin/
+.classpath
+.project
