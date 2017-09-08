@@ -16,7 +16,7 @@ public class TestCeldas
     public static void main(String[] args)
     {
     
-        String celdasAgent = "ar.fi.uba.celdas.Agent";        
+        String celdasAgent = "ar.fi.uba.celdas.RulesAgent";        
         
         //Available games:
         String gamesPath = "examples/gridphysics/";        
@@ -33,12 +33,13 @@ public class TestCeldas
 
         //String recordLevelFile = generateLevelPath + "zelda_glvl.txt";
         String recordActionsFile = null;//"actions_" + games[gameIdx] + "_lvl" + levelIdx + "_" + seed + ".txt"; //where to record the actions executed. null if not to save.
+        // String recordActionsFile = "/home/tomas/Desktop/prueba.txt";
 
         // 1. This starts a game, in a level, played by a human.
-        ArcadeMachine.playOneGame(game, level1, recordActionsFile, seed);
+        //ArcadeMachine.playOneGame(game, level1, recordActionsFile, seed);
         
         // 2. This plays a game in a level by the controller.        
-        //ArcadeMachine.runOneGame(game, level1, visuals, celdasAgent, recordActionsFile, seed, 0);
+        ArcadeMachine.runOneGame(game, level1, visuals, celdasAgent, recordActionsFile, seed, 0);
 
         // 3. This replays a game from an action file previously recorded
         //String readActionsFile = recordActionsFile;

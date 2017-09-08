@@ -17,7 +17,7 @@ public class Perception {
 		A: Agent A
 		+: llave
 		X: espada
-		2: ara�a
+		2: arania
 		g: puerta
 		.: empty space
 	 * 
