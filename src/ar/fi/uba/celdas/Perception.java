@@ -107,6 +107,7 @@ public class Perception {
 			System.out.println("Agent position en null!!!!");
 			System.out.println(stateObs.getAvatarPosition());
 			agentPosition = unknownObject;
+			agentOrientation = new Vector2d(stateObs.getAvatarOrientation());
 		}
 		pathFinder = new PathFinder(new ArrayList<Integer>(obstacleTypes));
 		pathFinder.run(stateObs);
