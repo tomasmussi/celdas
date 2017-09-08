@@ -5,9 +5,13 @@ package ar.fi.uba.celdas;
  * */
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import ontology.Types.ACTIONS;
 import tools.Vector2d;
+import tools.pathfinder.Node;
+import tools.pathfinder.PathFinder;
 import core.game.Observation;
 import core.game.StateObservation;
 
@@ -34,6 +38,9 @@ public class Perception {
 	private Vector2d agentPosition;
 	private Vector2d agentOrientation;
 	private boolean agentIsFacingSpider;
+	private PathFinder pathFinder;
+	private Vector2d nextItem;
+	private Vector2d unknownObject;
 
 	public Perception(StateObservation stateObs){
 		ArrayList<Observation>[][] grid = stateObs.getObservationGrid();
@@ -48,6 +55,9 @@ public class Perception {
 		this.spriteSizeWidthInPixels =  stateObs.getWorldDimension().width / levelWidth;
 		this.spriteSizeHeightInPixels =  stateObs.getWorldDimension().height / levelHeight;
 
+		Set<Integer> obstacleTypes = new HashSet<Integer>();
+		// ArrayList<Integer> obstacleTypes = new ArrayList<Integer>();
+
 		this.level = new char[levelHeight][levelWidth];
 		for(int i=0;i< levelWidth; i++){
 			for(int j=0;j< levelHeight; j++){
@@ -55,19 +65,37 @@ public class Perception {
 				if(!observationList.isEmpty()){
 					o = observationList.get(observationList.size()-1);
 					String element =  o.category+""+o.itype;
+
+
 					switch (element) {
-					case "40": this.level[j][i] = 'w'; break;
-					case "44": this.level[j][i] = '+'; break;
+					case "40": this.level[j][i] = 'w';
+					obstacleTypes.add(o.itype);
+					break;
+					case "44": this.level[j][i] = '+';
+					nextItem = new Vector2d(j,i);
+					break;
+
 					case "07": this.level[j][i] = 'A';
 					agentPosition = new Vector2d(j,i);
 					agentOrientation = new Vector2d(stateObs.getAvatarOrientation());
+					// pathFinder = new PathFinder();
 					System.out.println("Pos: " + agentPosition);
 					System.out.println("Orient: " + stateObs.getAvatarOrientation());
 					break;
-					case "311": this.level[j][i] = '2'; break;
-					case "23": this.level[j][i] = 'g'; break;
+
+					case "311": this.level[j][i] = '2';
+					obstacleTypes.add(o.itype);
+					break;
+					case "23": this.level[j][i] = 'g';
+					if (nextItem == null) {
+						nextItem = new Vector2d(j,i);
+					}
+					break;
+
 					case "55": this.level[j][i] = 'X'; break;
-					default: this.level[j][i] = '?'; break;
+					default: this.level[j][i] = '?';
+					unknownObject = new Vector2d(j,i);
+					break;
 
 					}
 				}else{
@@ -75,6 +103,13 @@ public class Perception {
 				}
 			}
 		}
+		if (agentPosition == null) {
+			System.out.println("Agent position en null!!!!");
+			System.out.println(stateObs.getAvatarPosition());
+			agentPosition = unknownObject;
+		}
+		pathFinder = new PathFinder(new ArrayList<Integer>(obstacleTypes));
+		pathFinder.run(stateObs);
 	}
 
 	public char getAt(int i, int j){
@@ -215,6 +250,35 @@ public class Perception {
 			return ACTIONS.ACTION_UP;
 		}
 		return ACTIONS.ACTION_USE;
+	}
+
+	public ACTIONS getNextMove() {
+		ArrayList<Node> path = pathFinder.getPath(new Vector2d(agentPosition.y, agentPosition.x), new Vector2d(nextItem.y, nextItem.x));
+		Vector2d correctAgentPosition = new Vector2d(agentPosition.y, agentPosition.x);
+		System.out.println("Player: " + correctAgentPosition);
+		if (path != null && !path.isEmpty()) {
+			Node nextBox = path.get(0);
+			System.out.println("Next box: " + nextBox.position);
+			if (nextBox.position.x != correctAgentPosition.x) {
+				if (nextBox.position.x > correctAgentPosition.x) {
+					System.out.println("Go Right");
+					return ACTIONS.ACTION_RIGHT;
+				} else {
+					System.out.println("Go Left");
+					return ACTIONS.ACTION_LEFT;
+				}
+			} else if (nextBox.position.y != correctAgentPosition.y) {
+				if (nextBox.position.y > correctAgentPosition.y) {
+					System.out.println("Go Down");
+					return ACTIONS.ACTION_DOWN;
+				} else {
+					System.out.println("Go Up");
+					return ACTIONS.ACTION_UP;
+				}
+			}
+			// System.out.println(agentPosition);
+		}
+		return ACTIONS.ACTION_RIGHT;
 	}
 
 }

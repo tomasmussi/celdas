@@ -34,12 +34,12 @@ public class RulesAgent extends AbstractPlayer{
 				return perception.faceSpider();
 			}
 		}
+		return perception.getNextMove();
 		/*ArrayList<Types.ACTIONS> actions = stateObs.getAvailableActions();
 		System.out.println(actions);
 		int index = (int)(Math.random() * actions.size());
 		return  actions.get(index);
 		 */
-		return ACTIONS.ACTION_RIGHT;
 	}
 }
 
