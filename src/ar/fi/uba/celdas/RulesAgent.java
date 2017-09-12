@@ -25,9 +25,9 @@ public class RulesAgent extends AbstractPlayer{
 	public ACTIONS act(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 
 		Perception perception = new Perception(stateObs);
-		System.out.println(perception);
+		// System.out.println(perception);
 		if (perception.isSpiderNear()) {
-			System.out.println("Araña cerca!!!!");
+			// System.out.println("Araña cerca!!!!");
 			if (perception.canKillSpider()) {
 				return ACTIONS.ACTION_USE;
 			} else {
