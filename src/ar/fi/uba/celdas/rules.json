@@ -1,0 +1,41 @@
+{
+	"rules" : [ 
+		{
+			"condition" : "isSpiderNear and canKillSpider", 
+			"rule" : "USE"
+		}, 
+		{
+			"condition" : "spiderIsRight",
+			"rule" : "RIGHT"
+		}, 
+		{
+			"condition" : "spiderIsLeft",
+			"rule" : "LEFT"
+		}, 
+		{
+			"condition" : "spiderIsUp",
+			"rule" : "UP"
+		}, 
+		{
+			"condition" : "spiderIsDown",
+			"rule" : "DOWN"
+		}, 
+		{
+			"condition" : "shouldGoRight",
+			"rule" : "RIGHT"
+		}, 
+		{
+			"condition" : "shouldGoLeft",
+			"rule" : "LEFT"
+		}, 
+		{
+			"condition" : "shouldGoUp",
+			"rule" : "UP"
+		}, 
+		{
+			"condition" : "shouldGoDown",
+			"rule" : "DOWN"
+		}
+	]
+}
+

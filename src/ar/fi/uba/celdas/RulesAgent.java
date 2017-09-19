@@ -1,4 +1,7 @@
 package ar.fi.uba.celdas;
+import java.util.Iterator;
+import java.util.List;
+
 import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
 import core.game.StateObservation;
@@ -6,6 +9,7 @@ import core.player.AbstractPlayer;
 
 public class RulesAgent extends AbstractPlayer{
 
+	private List<Rule> rules;
 
 	/**
 	 * initialize all variables for the agent
@@ -13,6 +17,8 @@ public class RulesAgent extends AbstractPlayer{
 	 * @param elapsedTimer Timer when the action returned is due.
 	 */
 	public RulesAgent(StateObservation stateObs, ElapsedCpuTimer elapsedTimer){
+		RulesParser parser = new RulesParser();
+		rules = parser.getRules();
 	}
 
 	/**
@@ -26,6 +32,16 @@ public class RulesAgent extends AbstractPlayer{
 
 		Perception perception = new Perception(stateObs);
 		// System.out.println(perception);
+		Iterator<Rule> it = rules.iterator();
+		while (it.hasNext()) {
+			Rule rule = it.next();
+			// System.out.println(rule.toString());
+			if (rule.isTrue(perception)) {
+				return rule.action();
+			}
+		}
+		return ACTIONS.ACTION_RIGHT;
+		/*
 		if (perception.isSpiderNear()) {
 			// System.out.println("Araña cerca!!!!");
 			if (perception.canKillSpider()) {
@@ -35,10 +51,6 @@ public class RulesAgent extends AbstractPlayer{
 			}
 		}
 		return perception.getNextMove();
-		/*ArrayList<Types.ACTIONS> actions = stateObs.getAvailableActions();
-		System.out.println(actions);
-		int index = (int)(Math.random() * actions.size());
-		return  actions.get(index);
 		 */
 	}
 }

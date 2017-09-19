@@ -214,7 +214,8 @@ public class Perception {
 			System.out.println(level[(int)agentPosition.x + 1][(int)agentPosition.y]);*/
 	}
 
-	private boolean spiderIsRight() {
+
+	public boolean spiderIsRight() {
 		// Right
 		if (level[(int)agentPosition.x][(int)agentPosition.y + 1] == '2'
 				|| level[(int)agentPosition.x][(int)agentPosition.y + 1] == 'm'
@@ -231,7 +232,7 @@ public class Perception {
 		return false;
 	}
 
-	private boolean spiderIsLeft() {
+	public boolean spiderIsLeft() {
 		// Left
 		if (level[(int)agentPosition.x][(int)agentPosition.y - 1] == '2'
 				|| level[(int)agentPosition.x][(int)agentPosition.y + 1] == 'm'
@@ -247,7 +248,7 @@ public class Perception {
 		return false;
 	}
 
-	private boolean spiderIsDown() {
+	public boolean spiderIsDown() {
 		// Down
 		if (level[(int)agentPosition.x + 1][(int)agentPosition.y] == '2'
 				|| level[(int)agentPosition.x][(int)agentPosition.y + 1] == 'm'
@@ -263,7 +264,7 @@ public class Perception {
 		return false;
 	}
 
-	private boolean spiderIsUp() {
+	public boolean spiderIsUp() {
 		// Up
 		if (level[(int)agentPosition.x - 1][(int)agentPosition.y - 1] == '2'
 				|| level[(int)agentPosition.x][(int)agentPosition.y + 1] == 'm'
@@ -329,6 +330,22 @@ public class Perception {
 			// System.out.println(agentPosition);
 		}
 		return ACTIONS.ACTION_RIGHT;
+	}
+
+	public boolean shouldGoRight() {
+		return getNextMove() == ACTIONS.ACTION_RIGHT;
+	}
+
+	public boolean shouldGoLeft() {
+		return getNextMove() == ACTIONS.ACTION_LEFT;
+	}
+
+	public boolean shouldGoDown() {
+		return getNextMove() == ACTIONS.ACTION_DOWN;
+	}
+
+	public boolean shouldGoUp() {
+		return getNextMove() == ACTIONS.ACTION_UP;
 	}
 
 }
