@@ -348,4 +348,8 @@ public class Perception {
 		return getNextMove() == ACTIONS.ACTION_UP;
 	}
 
+	public Vector2d getAgentPosition() {
+		return agentPosition;
+	}
+
 }

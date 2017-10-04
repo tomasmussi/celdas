@@ -16,7 +16,8 @@ public class TestCeldas
 	public static void main(String[] args)
 	{
 
-		String celdasAgent = "ar.fi.uba.celdas.RulesAgent";
+		//String celdasAgent = "ar.fi.uba.celdas.RulesAgent";
+		String celdasAgent = "ar.fi.uba.celdas.AutonomusAgent";
 
 		//Available games:
 		String gamesPath = "examples/gridphysics/";
@@ -27,7 +28,7 @@ public class TestCeldas
 		int seed = new Random().nextInt();
 
 		//Zelda Game and level to play
-		int levelIdx = 4; //level names from 0 to 4 (game_lvlN.txt).
+		int levelIdx = 0; //level names from 0 to 4 (game_lvlN.txt).
 		String game = gamesPath +"zelda.txt";
 		String level1 = gamesPath + "zelda_lvl" + levelIdx +".txt";
 
