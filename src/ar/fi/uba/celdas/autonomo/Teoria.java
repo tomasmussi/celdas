@@ -53,6 +53,17 @@ public class Teoria {
 		cargarCondicionSupuesta();
 	}
 
+	private Teoria() {
+		this.nivel = null;
+		this.posicionAgente = null;
+
+		// Por ahora solo voy a ver lo que tengo inmediatamente alrededor
+		condicionSupuesta = new char[3][3];
+		efectoPredicho = new char[3][3];
+		this.cantidadUtilizada = 0;
+		this.cantidadExito = 0;
+	}
+
 	private void cargarCondicionSupuesta() {
 		int lowerX = (int) (posicionAgente.x - 1);
 		int upperX = (int) (posicionAgente.x + 1);
@@ -102,18 +113,88 @@ public class Teoria {
 	}
 
 	/**
-	 * Falta determinar que es mas similar
+	 * Una teoria es similar a otra si:
+	 * 1) tienen misma accion y:
+	 * 		a) tienen mismos efectos predichos
+	 * 		o
+	 * 		b) tienen mismas condiciones supuestas
+	 *
 	 * */
 	public boolean esSimilar(Teoria otra) {
-		int estaTeoria = 0;
-		int otraTeoria = 0;
-		for (int f = 0; f < efectoPredicho.length; f++) {
-			for (int c = 0; c < efectoPredicho[f].length; c++) {
-				estaTeoria += (efectoPredicho[f][c] == '?') ? 1 : 0;
-				otraTeoria += (otra.efectoPredicho[f][c] == '?') ? 1 : 0;
+		if (this.accion != otra.accion) {
+			return false;
+		}
+		int csDiferencias = 0;
+		for (int f = 0; f < condicionSupuesta.length; f++) {
+			for (int c = 0; c < condicionSupuesta[f].length; c++) {
+				if (this.condicionSupuesta[f][c] != otra.condicionSupuesta[f][c]) {
+					csDiferencias++;
+				}
 			}
 		}
-		return estaTeoria < otraTeoria;
+		if (csDiferencias == 1) {
+			// Si se diferencian en solo 1 bloque de los aledanios, son similares y
+			// se puede aplicar heuristica EXCLUSION
+			return true;
+		}
+		int epSimilares = 0;
+		for (int f = 0; f < efectoPredicho.length; f++) {
+			for (int c = 0; c < efectoPredicho[f].length; c++) {
+				if (this.efectoPredicho[f][c] != otra.efectoPredicho[f][c]) {
+					epSimilares++;
+				}
+			}
+		}
+		if (epSimilares == 1) {
+			// Si se diferencian en solo 1 bloque de los aledanios, son similares y
+			// se puede aplicar heuristica EXCLUSION
+			return true;
+		}
+		// Si tienen misma accion, pero no hubo match de cs o ep, no son similares
+		return false;
+	}
+
+
+	public Teoria generalizarCon(Teoria teoriaIteracionAnterior) {
+		if (!this.esSimilar(teoriaIteracionAnterior)) {
+			System.err.println("Se quizo generalizar con teorias que no son similares");
+			return null;
+		}
+		Teoria mutante = new Teoria();
+		mutante.accion = this.accion;
+
+		for (int f = 0; f < this.condicionSupuesta.length; f++) {
+			for (int c = 0; c < this.condicionSupuesta[f].length; c++) {
+				// Copio condiciones supuestas y efectos predichos
+				mutante.condicionSupuesta[f][c] = this.condicionSupuesta[f][c];
+				mutante.efectoPredicho[f][c] = this.efectoPredicho[f][c];
+			}
+		}
+		// Se que se diferencian en CS o EP
+		boolean cs = false;
+		boolean ep = false;
+		for (int f = 0; f < this.condicionSupuesta.length; f++) {
+			for (int c = 0; c < this.condicionSupuesta[f].length; c++) {
+				if (this.condicionSupuesta[f][c] != teoriaIteracionAnterior.condicionSupuesta[f][c]) {
+					mutante.condicionSupuesta[f][c] = '?';
+					cs = true;
+				}
+			}
+		}
+		for (int f = 0; f < this.efectoPredicho.length; f++) {
+			for (int c = 0; c < this.efectoPredicho[f].length; c++) {
+				if (this.efectoPredicho[f][c] != teoriaIteracionAnterior.efectoPredicho[f][c]) {
+					mutante.efectoPredicho[f][c] = '?';
+					ep = true;
+				}
+			}
+		}
+		if (cs && ep) {
+			System.err.println("Se modifico el efecto predicho y la condicion supuesta");
+		}
+
+		return mutante;
+
 	}
 
 	public boolean mismasCondiciones(Teoria teoriaPrevia) {
@@ -202,5 +283,6 @@ public class Teoria {
 		}
 		return "";
 	}
+
 
 }

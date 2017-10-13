@@ -45,16 +45,23 @@ public class AutonomusAgent extends AbstractPlayer {
 				return;
 			}
 		}
-		/*		// Si no existe teoria como la local, verificar si hay teoria similar
+		// Si no existe teoria como la local, verificar si hay teoria similar
+		Teoria teoriaMutante = null;
 		for (Teoria teoria : teorias) {
-			if (teoria.mismasCondiciones(teoriaIteracionAnterior)) {
-				teoria.reforzarTeoria();
-				System.out.println("YA HABIA TEORIA COMO LA ACTUAL: " + teoria.toString());
-				return;
+			if (teoria.esSimilar(teoriaIteracionAnterior)) {
+				teoriaMutante = teoria.generalizarCon(teoriaIteracionAnterior);
+				System.out.println("NUEVA TEORIA MAS GENERALIZADA" + teoria.toString());
+				// TODO: No estoy seguro si deberia cortar aca o deberia seguir generalizando
+				break;
 			}
-		}*/
+		}
+		if (teoriaMutante != null) {
+			System.out.println("Agregando a la lista...");
+			teorias.add(teoriaMutante);
+		}
 		teorias.add(teoriaIteracionAnterior);
 
 	}
+
 
 }
