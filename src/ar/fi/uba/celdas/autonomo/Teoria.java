@@ -1,4 +1,4 @@
-package ar.fi.uba.celdas;
+package ar.fi.uba.celdas.autonomo;
 
 import java.util.Random;
 

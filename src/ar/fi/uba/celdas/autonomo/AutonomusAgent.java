@@ -1,8 +1,9 @@
-package ar.fi.uba.celdas;
+package ar.fi.uba.celdas.autonomo;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import ar.fi.uba.celdas.Perception;
 import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
 import core.game.StateObservation;
