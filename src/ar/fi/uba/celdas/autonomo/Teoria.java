@@ -7,6 +7,8 @@ import tools.Vector2d;
 
 public class Teoria {
 
+	private static final int MASK = (-1) >>> 1; // all ones except the sign bit
+
 	private static ACTIONS[] POSIBLES = {ACTIONS.ACTION_DOWN, ACTIONS.ACTION_LEFT, ACTIONS.ACTION_RIGHT,
 		ACTIONS.ACTION_UP, ACTIONS.ACTION_USE, ACTIONS.ACTION_NIL};
 	private char[][] nivel;
@@ -38,7 +40,11 @@ public class Teoria {
 
 		// Por ahora solo voy a ver lo que tengo inmediatamente alrededor
 		condicionSupuesta = new char[3][3];
-		accion = null;
+
+		Random rn = new Random();
+		int i = (rn.nextInt() & MASK) % POSIBLES.length;
+		accion = POSIBLES[i];
+
 		efectoPredicho = new char[3][3];
 
 		this.cantidadUtilizada = 0;
@@ -78,13 +84,10 @@ public class Teoria {
 	}
 
 	public ACTIONS getAccionTeoria() {
-		if (accion == null) {
-			Random rn = new Random();
-			int i = rn.nextInt() % POSIBLES.length;
-			accion = POSIBLES[i];
-		}
 		return accion;
 	}
+
+
 
 	public boolean esMasGenericaQue(Teoria otra) {
 		int estaTeoria = 0;
@@ -113,30 +116,17 @@ public class Teoria {
 		return estaTeoria < otraTeoria;
 	}
 
-	public String toString(){
-		StringBuilder sb = new StringBuilder("");
-		if(nivel!=null){
-			for(int i=0;i< nivel.length; i++){
-				for(int j=0;j<  nivel[i].length; j++){
-					sb.append(nivel[i][j]);
-				}
-				sb.append("\n");
-			}
-		}
-		sb.append("\n\n\n");
-		for(int i=0;i< condicionSupuesta.length; i++){
-			for(int j=0;j<  condicionSupuesta[i].length; j++){
-				sb.append(condicionSupuesta[i][j]);
-			}
-			sb.append("\n");
-		}
-		return sb.toString();
-	}
-
 	public boolean mismasCondiciones(Teoria teoriaPrevia) {
 		for (int f = 0; f < condicionSupuesta.length; f++) {
 			for (int c = 0; c < condicionSupuesta[f].length; c++) {
 				if (condicionSupuesta[f][c] != teoriaPrevia.condicionSupuesta[f][c]) {
+					return false;
+				}
+			}
+		}
+		for (int f = 0; f < efectoPredicho.length; f++) {
+			for (int c = 0; c < efectoPredicho[f].length; c++) {
+				if (efectoPredicho[f][c] != teoriaPrevia.efectoPredicho[f][c]) {
 					return false;
 				}
 			}
@@ -150,6 +140,67 @@ public class Teoria {
 	public void reforzarTeoria() {
 		this.cantidadUtilizada++;
 		this.cantidadExito++;
+	}
+	/*
+	public String toString(){
+		StringBuilder sb = new StringBuilder("");
+		if(nivel!=null){
+			for(int i=0;i< nivel.length; i++){
+				for(int j=0;j<  nivel[i].length; j++){
+					sb.append(nivel[i][j]);
+				}
+				sb.append("\n");
+			}
+		}
+		sb.append("\n");
+		for(int i=0;i< condicionSupuesta.length; i++){
+			for(int j=0;j<  condicionSupuesta[i].length; j++){
+				sb.append(condicionSupuesta[i][j]);
+			}
+			sb.append("\n");
+		}
+		sb.append(accionToString());
+		return sb.toString();
+	}
+	 */
+	public String toString(){
+		StringBuilder sb = new StringBuilder("");
+		for(int i=0;i< condicionSupuesta.length; i++){
+			for(int j=0;j<  condicionSupuesta[i].length; j++){
+				sb.append(condicionSupuesta[i][j]);
+			}
+			if (i == 1) {
+				sb.append("\t\t");
+				sb.append(accionToString());
+				sb.append("\t\t");
+			} else {
+				sb.append("\t\t\t\t");
+			}
+
+			for (int j = 0; j < efectoPredicho.length; j++) {
+				sb.append(efectoPredicho[i][j]);
+			}
+			sb.append("\n");
+		}
+		sb.append("\n");
+		return sb.toString();
+	}
+
+	private String accionToString() {
+		if (ACTIONS.ACTION_DOWN.equals(accion)) {
+			return "DOWN";
+		} else if (ACTIONS.ACTION_LEFT.equals(accion)) {
+			return "LEFT";
+		} else if (ACTIONS.ACTION_RIGHT.equals(accion)) {
+			return "RIGT";
+		} else if (ACTIONS.ACTION_UP.equals(accion)) {
+			return "UPPP";
+		} else if (ACTIONS.ACTION_USE.equals(accion)) {
+			return "USEE";
+		} else if (ACTIONS.ACTION_NIL.equals(accion)) {
+			return "NOTH";
+		}
+		return "";
 	}
 
 }

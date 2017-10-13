@@ -17,7 +17,7 @@ public class TestCeldas
 	{
 
 		//String celdasAgent = "ar.fi.uba.celdas.RulesAgent";
-		String celdasAgent = "ar.fi.uba.celdas.AutonomusAgent";
+		String celdasAgent = "ar.fi.uba.celdas.autonomo.AutonomusAgent";
 
 		//Available games:
 		String gamesPath = "examples/gridphysics/";
