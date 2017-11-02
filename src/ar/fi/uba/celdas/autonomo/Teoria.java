@@ -448,5 +448,37 @@ public class Teoria {
 		this.cantidadUtilizada = teoria.cantidadUtilizada;
 	}
 
+	/**
+	 * this efecto == eslabon condicion supuesta
+	 * */
+	public boolean tieneComoEfecto(Teoria eslabon) {	
+		for (int f = 0; f < this.condicionSupuesta.length; f++) {
+			for (int c = 0; c < this.condicionSupuesta[f].length; c++) {
+				if (condicionSupuesta[f][c] != '?' && eslabon.efectoPredicho[f][c] != '?') {
+					if (condicionSupuesta[f][c] != eslabon.efectoPredicho[f][c]) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	public boolean tieneCondicionSupuesta(char[][] condicionActual, boolean tieneLlave2) {
+		if (this.tieneLlave != tieneLlave2) {
+			return false;
+		}
+		for (int f = 0; f < this.condicionSupuesta.length; f++) {
+			for (int c = 0; c < this.condicionSupuesta[f].length; c++) {
+				if (condicionSupuesta[f][c] != '?' && condicionActual[f][c] != '?') {
+					if (condicionSupuesta[f][c] != condicionActual[f][c]) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+
 
 }

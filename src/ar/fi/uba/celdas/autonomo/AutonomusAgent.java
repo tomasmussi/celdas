@@ -13,6 +13,7 @@ public class AutonomusAgent extends AbstractPlayer {
 
 	private List<Teoria> teorias;
 	private Teoria teoriaIteracionAnterior;
+	private Planificador planTransitorio;
 
 	public AutonomusAgent(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 		teorias = new ArrayList<Teoria>();
@@ -29,6 +30,23 @@ public class AutonomusAgent extends AbstractPlayer {
 			agregarTeoria();
 		}
 		teoriaIteracionAnterior = teoriaLocal;
+
+		// Planificar
+		if (planTransitorio != null) {
+			if (planTransitorio.todaviaSirve(teoriaLocal)) {
+				return planTransitorio.dameAccionPlan();				
+			} else {
+				planTransitorio = null;
+			}			
+		}
+		Planificador plan = new Planificador(teorias, teoriaIteracionAnterior.getCondicionSupuesta(), teoriaIteracionAnterior.getTieneLlave(), teoriaIteracionAnterior.utilidad());
+		if (plan.hayPlan()) {
+			ACTIONS accion = plan.dameAccionPlan();
+			planTransitorio = plan;
+			return accion;
+		} else if (plan.hayTeoriaUtil()) {
+			return plan.dameAccionTeoriaUtil();
+		}
 		return teoriaLocal.getAccionTeoria();
 	}
 

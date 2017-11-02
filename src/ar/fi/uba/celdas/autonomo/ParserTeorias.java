@@ -33,14 +33,13 @@ public class ParserTeorias {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			System.out.println(sb.toString());
+
 			JSONObject js = new JSONObject(sb.toString());
 			JSONArray array = js.getJSONArray("teorias");
 			Iterator it = array.iterator();
 			while (it.hasNext()) {
 				JSONObject jsonTeoria = (JSONObject) it.next();
 				Teoria t = new Teoria(jsonTeoria);
-				System.out.println(t.toString());
 				teorias.add(t);				
 			}
 		} catch (FileNotFoundException e) {
@@ -54,9 +53,7 @@ public class ParserTeorias {
 		try {
 			JSONObject js = new JSONObject();
 			js.put("teorias", teorias);
-			System.out.println(js.toString());
-			
-			
+		
 			String teoriasFile = "/home/tomas/Desktop/teorias.json";
 			File file;
 			file = new File(teoriasFile);
