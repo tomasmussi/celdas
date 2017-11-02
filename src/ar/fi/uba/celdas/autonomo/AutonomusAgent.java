@@ -65,8 +65,8 @@ public class AutonomusAgent extends AbstractPlayer {
 	public void result(StateObservation stateObs, ElapsedCpuTimer elapsedCpuTimer) {
 		Perception perception = new Perception(stateObs, true);
 		if (teoriaIteracionAnterior != null) {
-			Teoria fin = new Teoria(perception);
-			teoriaIteracionAnterior.setEfecto(fin);
+			teoriaIteracionAnterior.setEfecto(perception);
+			teoriaIteracionAnterior.reforzarUsos();
 		}
 		persistirTeorias();
 	}

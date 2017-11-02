@@ -140,6 +140,23 @@ public class Teoria {
 			}
 		}
 	}
+	
+	public void setEfecto(Perception perception) {
+		int lowerX = (int) (posicionAgente.x - 1);
+		int upperX = (int) (posicionAgente.x + 1);
+		int lowerY = (int) (posicionAgente.y - 1);
+		int upperY = (int) (posicionAgente.y + 1);
+		int posFila = 0;
+		int posCol = 0;
+		for (int fila = lowerX; fila <= upperX; fila++) {
+			for (int col = lowerY; col <= upperY; col++) {
+				efectoPredicho[posFila][posCol] = this.nivel[fila][col];
+				posCol++;
+			}
+			posFila++;
+			posCol = 0;
+		}
+	}
 
 	public ACTIONS getAccionTeoria() {
 		return accion;
