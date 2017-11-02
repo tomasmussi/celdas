@@ -57,6 +57,9 @@ public class Planificador {
 			if (teoria.utilidad() >= 90) {
 				objetivos.add(teoria);				
 			}
+			if (teoria.tieneLlave()) {
+				
+			}
 		}
 		while (!objetivos.isEmpty() && !hayPlan) {
 			Teoria objetivo = objetivos.poll();
@@ -69,7 +72,8 @@ public class Planificador {
 		plan.add(objetivo);
 		boolean continuar = true;
 		Teoria eslabon = objetivo;
-		while (continuar) {
+		int iteracion = 0;
+		while (continuar && iteracion <= 100) {
 			continuar = false;
 			for (Teoria teoria : teorias) {
 				if (teoria.tieneComoEfecto(eslabon)) {
@@ -88,6 +92,7 @@ public class Planificador {
 				Collections.reverse(this.plan);
 				return true;
 			}
+			iteracion++;
 		}
 		return false;	
 	}

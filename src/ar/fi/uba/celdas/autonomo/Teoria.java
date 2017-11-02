@@ -1,5 +1,6 @@
 package ar.fi.uba.celdas.autonomo;
 
+import java.text.AttributedCharacterIterator;
 import java.util.Iterator;
 import java.util.Random;
 
@@ -319,6 +320,65 @@ public class Teoria {
 		this.cantidadExito++;
 	}
 	
+	private int getFilaCol(char filaCol) {
+		switch (this.accion) {
+		case ACTION_DOWN:
+			if (filaCol == 'i') {
+				return 1;
+			} else {
+				return 2;
+			}
+		case ACTION_UP:
+			if (filaCol == 'i') {
+				return 1;
+			} else {
+				return 0;
+			}
+		case ACTION_LEFT:
+			if (filaCol == 'i') {
+				return 0;
+			} else {
+				return 1;
+			}
+		case ACTION_RIGHT:
+			if (filaCol == 'i') {
+				return 2;
+			} else {
+				return 1;
+			}
+		case ACTION_USE:
+			if (orientacion == ACTIONS.ACTION_DOWN) {
+				if (filaCol == 'i') {
+					return 1;
+				} else {
+					return 2;
+				}
+			} else if (orientacion == ACTIONS.ACTION_UP) {
+				if (filaCol == 'i') {
+					return 1;
+				} else {
+					return 0;
+				}
+			} else if (orientacion == ACTIONS.ACTION_LEFT) {
+				if (filaCol == 'i') {
+					return 0;
+				} else {
+					return 1;
+				}
+			} else if (orientacion == ACTIONS.ACTION_RIGHT) {
+				if (filaCol == 'i') {
+					return 2;
+				} else {
+					return 1;
+				}
+			}
+			break;
+		default:
+			break;
+		}
+		return 0;
+	}
+	
 	/**
 	 * Evalua utilidad de esta teoria:
 	 * 100 => tengo llave y entro a la puerta
@@ -330,55 +390,93 @@ public class Teoria {
 	 * */
 	public int utilidad() {
 		int i,j;
-		i = 0;
-		j = 0;
+		i = getFilaCol('i');
+		j = getFilaCol('j');
 		switch (this.accion) {
 		case ACTION_DOWN:
-			i = 1;
-			j = 2;
+			if (this.tieneLlave && condicionSupuesta[2][1] == 'g') {
+				return 100;
+			}
+			if (!this.tieneLlave && condicionSupuesta[2][1] == '+') {
+				return 90;
+			}
+			if (condicionSupuesta[2][1] == '2' || condicionSupuesta[2][1] == 's' || condicionSupuesta[2][1] == 'm') {
+				return 0;
+			}
+			if (condicionSupuesta[0][1] == '2' || condicionSupuesta[0][1] == 's' || condicionSupuesta[0][1] == 'm') {
+				return 40;
+			}
 			break;
 		case ACTION_UP:
-			i = 1;
-			j = 0;
+			if (this.tieneLlave && condicionSupuesta[0][1] == 'g') {
+				return 100;
+			}
+			if (!this.tieneLlave && condicionSupuesta[0][1] == '+') {
+				return 90;
+			}
+			if (condicionSupuesta[0][1] == '2' || condicionSupuesta[0][1] == 's' || condicionSupuesta[0][1] == 'm') {
+				return 0;
+			}
+			if (condicionSupuesta[2][1] == '2' || condicionSupuesta[2][1] == 's' || condicionSupuesta[2][1] == 'm') {
+				return 40;
+			}
 			break;
 		case ACTION_LEFT:
-			i = 0;
-			j = 1;
+			if (this.tieneLlave && condicionSupuesta[1][0] == 'g') {
+				return 100;
+			}
+			if (!this.tieneLlave && condicionSupuesta[1][0] == '+') {
+				return 90;
+			}
+			if (condicionSupuesta[1][0] == '2' || condicionSupuesta[1][0] == 's' || condicionSupuesta[1][0] == 'm') {
+				return 0;
+			}
+			if (condicionSupuesta[1][2] == '2' || condicionSupuesta[1][2] == 's' || condicionSupuesta[1][2] == 'm') {
+				return 40;
+			}
 			break;
 		case ACTION_RIGHT:
-			i = 2;
-			j = 1;
+			if (this.tieneLlave && condicionSupuesta[1][2] == 'g') {
+				return 100;
+			}
+			if (!this.tieneLlave && condicionSupuesta[1][2] == '+') {
+				return 90;
+			}
+			if (condicionSupuesta[1][2] == '2' || condicionSupuesta[1][2] == 's' || condicionSupuesta[1][2] == 'm') {
+				return 0;
+			}
+			if (condicionSupuesta[1][0] == '2' || condicionSupuesta[1][0] == 's' || condicionSupuesta[1][0] == 'm') {
+				return 40;
+			}
 			break;
 		case ACTION_USE:
-			if (orientacion == ACTIONS.ACTION_DOWN) {
-				i = 1;
-				j = 2;
-			} else if (orientacion == ACTIONS.ACTION_UP) {
-				i = 1;
-				j = 0;
-			} else if (orientacion == ACTIONS.ACTION_LEFT) {
-				i = 0;
-				j = 1;
-			} else if (orientacion == ACTIONS.ACTION_RIGHT) {
-				i = 2;
-				j = 1;
+			switch (orientacion) {
+			case ACTION_DOWN:
+				if (condicionSupuesta[2][1] == '2' || condicionSupuesta[2][1] == 's' || condicionSupuesta[2][1] == 'm') {
+					return 50;
+				}
+				break;
+			case ACTION_UP:
+				if (condicionSupuesta[0][1] == '2' || condicionSupuesta[0][1] == 's' || condicionSupuesta[0][1] == 'm') {
+					return 50;
+				}
+				break;
+			case ACTION_LEFT:
+				if (condicionSupuesta[1][0] == '2' || condicionSupuesta[1][0] == 's' || condicionSupuesta[1][0] == 'm') {
+					return 50;
+				}
+				break;
+			case ACTION_RIGHT:
+				if (condicionSupuesta[1][2] == '2' || condicionSupuesta[1][2] == 's' || condicionSupuesta[1][2] == 'm') {
+					return 50;
+				}
+				break;
+			default:
+				break;
 			}
 			break;
 		default:
 			break;
-		}
-		if (this.tieneLlave && condicionSupuesta[i][j] == 'g' && accion != ACTIONS.ACTION_USE) {
-			return 100;
-		}
-		if (!this.tieneLlave && condicionSupuesta[i][j] == '+' && accion != ACTIONS.ACTION_USE) {
-			return 90;
-		}
-		if (condicionSupuesta[i][j] == '2' || condicionSupuesta[i][j] == 's' || condicionSupuesta[i][j] == 'm') {
-			if (accion == ACTIONS.ACTION_USE) {
-				return 50;
-			} else {
-				return 0;
-			}
 		}
 		return 10;
 	}
@@ -478,6 +576,17 @@ public class Teoria {
 			}
 		}
 		return true;
+	}
+
+	public boolean tieneLlave() {
+		for (int f = 0; f < this.condicionSupuesta.length; f++) {
+			for (int c = 0; c < this.condicionSupuesta[f].length; c++) {
+				if (condicionSupuesta[f][c] == '+' || efectoPredicho[f][c] == '+' && accion == ACTIONS.ACTION_DOWN) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 

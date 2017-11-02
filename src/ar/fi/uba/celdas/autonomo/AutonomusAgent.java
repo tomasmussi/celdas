@@ -77,7 +77,7 @@ public class AutonomusAgent extends AbstractPlayer {
 			}
 		}
 		if (teoriaMutante != null) {
-			teorias.add(teoriaMutante);
+			// teorias.add(teoriaMutante);
 		}
 		if (agregarTeoriaNueva) {
 			teorias.add(teoriaIteracionAnterior);
