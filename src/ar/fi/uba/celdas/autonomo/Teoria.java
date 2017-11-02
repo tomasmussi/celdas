@@ -183,6 +183,10 @@ public class Teoria {
 		return csDiferencias == 0 && (this.tieneLlave == otra.tieneLlave);
 	}
 	
+	public boolean distintosEfectos(Teoria otra) {
+		return accion == otra.accion && mismasCondicionesSupuestas(otra) && !mismoEfectoPredicho(otra);
+	}
+	
 	/**
 	 * Verifica si hay diferencias en el efecto predicho de las teorias
 	 * */
@@ -436,6 +440,10 @@ public class Teoria {
 	
 	public int getCantidadExito() {
 		return cantidadExito;
+	}
+
+	public void copiarUsos(Teoria teoria) {
+		this.cantidadUtilizada = teoria.cantidadUtilizada;
 	}
 
 

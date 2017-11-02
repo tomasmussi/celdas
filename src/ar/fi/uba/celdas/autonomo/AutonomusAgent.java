@@ -28,37 +28,43 @@ public class AutonomusAgent extends AbstractPlayer {
 			teoriaIteracionAnterior.setEfecto(teoriaLocal);
 			agregarTeoria();
 		}
-		if (teoriaIteracionAnterior != null) {
-			System.out.println(teoriaIteracionAnterior.toString());
-		}
 		teoriaIteracionAnterior = teoriaLocal;
-		// persistirTeorias();
 		return teoriaLocal.getAccionTeoria();
 	}
 
 	private void agregarTeoria() {
+		teoriaIteracionAnterior.reforzarExitos(); // No mori al usar la teoria
+		teoriaIteracionAnterior.reforzarUsos(); // Use la teoria
+		boolean agregarTeoriaNueva = true;
 		// Si existe teoria igual a la local, reforzar teoria
 		for (Teoria teoria : teorias) {
 			if (teoria.mismasCondiciones(teoriaIteracionAnterior)) {
 				teoria.reforzarExitos();
 				teoria.reforzarUsos();
-				System.out.println("YA HABIA TEORIA COMO LA ACTUAL: " + teoria.toString());
+				agregarTeoriaNueva = false;
+				break; // No deberia encontrar mas teorias iguales, deberian ser unicas
 			}
 		}
-		// Si no existe teoria como la local, verificar si hay teoria similar
-		Teoria teoriaMutante = null;
+ 
 		for (Teoria teoria : teorias) {
-			if (teoria.esSimilar(teoriaIteracionAnterior)) {
-				teoriaMutante = teoria.generalizarCon(teoriaIteracionAnterior);
-				System.out.println("NUEVA TEORIA MAS GENERALIZADA" + teoria.toString());
-				break;
+			// Busco generalizar
+			if (!teoria.mismasCondiciones(teoriaIteracionAnterior) && teoria.esSimilar(teoriaIteracionAnterior)) {
+				// Es similar, pero no la misma
+				Teoria teoriaMutante = teoria.generalizarCon(teoriaIteracionAnterior);
+				if (teoriaMutante != null) {
+					teorias.add(teoriaMutante);
+				}
+			}
+			// Busco mismas condiciones supuestas y accion, pero efectos predichos distintos
+			if (teoria.distintosEfectos(teoriaIteracionAnterior)) {
+				teoria.reforzarUsos();
+				teoriaIteracionAnterior.reforzarExitos();
+				teoriaIteracionAnterior.copiarUsos(teoria);
 			}
 		}
-		if (teoriaMutante != null) {
-			System.out.println("Agregando a la lista...");
-			teorias.add(teoriaMutante);
+		if (agregarTeoriaNueva) {
+			teorias.add(teoriaIteracionAnterior);
 		}
-		teorias.add(teoriaIteracionAnterior);
 	}
 	
 	@Override
