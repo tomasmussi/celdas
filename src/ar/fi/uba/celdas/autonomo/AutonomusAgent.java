@@ -45,22 +45,21 @@ public class AutonomusAgent extends AbstractPlayer {
 				break; // No deberia encontrar mas teorias iguales, deberian ser unicas
 			}
 		}
- 
+		Teoria teoriaMutante = null;
 		for (Teoria teoria : teorias) {
 			// Busco generalizar
 			if (!teoria.mismasCondiciones(teoriaIteracionAnterior) && teoria.esSimilar(teoriaIteracionAnterior)) {
 				// Es similar, pero no la misma
-				Teoria teoriaMutante = teoria.generalizarCon(teoriaIteracionAnterior);
-				if (teoriaMutante != null) {
-					teorias.add(teoriaMutante);
-				}
+				teoriaMutante = teoria.generalizarCon(teoriaIteracionAnterior);
 			}
 			// Busco mismas condiciones supuestas y accion, pero efectos predichos distintos
 			if (teoria.distintosEfectos(teoriaIteracionAnterior)) {
 				teoria.reforzarUsos();
-				teoriaIteracionAnterior.reforzarExitos();
 				teoriaIteracionAnterior.copiarUsos(teoria);
 			}
+		}
+		if (teoriaMutante != null) {
+			teorias.add(teoriaMutante);
 		}
 		if (agregarTeoriaNueva) {
 			teorias.add(teoriaIteracionAnterior);

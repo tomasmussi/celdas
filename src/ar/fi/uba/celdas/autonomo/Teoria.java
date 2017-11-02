@@ -276,6 +276,8 @@ public class Teoria {
 		Teoria mutante = new Teoria();
 		mutante.accion = this.accion;
 		mutante.tieneLlave = this.tieneLlave;
+		mutante.cantidadExito = this.cantidadExito;
+		mutante.cantidadUtilizada = this.cantidadUtilizada;
 
 		for (int f = 0; f < this.condicionSupuesta.length; f++) {
 			for (int c = 0; c < this.condicionSupuesta[f].length; c++) {
@@ -314,7 +316,7 @@ public class Teoria {
 	}
 	
 	public void reforzarExitos() {
-		this.cantidadUtilizada++;
+		this.cantidadExito++;
 	}
 	
 	/**

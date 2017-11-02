@@ -2,6 +2,7 @@ package ar.fi.uba.celdas.autonomo;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,6 +43,7 @@ public class ParserTeorias {
 				System.out.println(t.toString());
 				teorias.add(t);				
 			}
+		} catch (FileNotFoundException e) {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
