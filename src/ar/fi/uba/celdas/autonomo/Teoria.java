@@ -1,22 +1,33 @@
 package ar.fi.uba.celdas.autonomo;
 
+import java.util.Iterator;
 import java.util.Random;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import ontology.Types.ACTIONS;
 import tools.Vector2d;
+import ar.fi.uba.celdas.Perception;
 
 public class Teoria {
 
 	private static final int MASK = (-1) >>> 1; // all ones except the sign bit
 
 	private static ACTIONS[] POSIBLES = {ACTIONS.ACTION_DOWN, ACTIONS.ACTION_LEFT, ACTIONS.ACTION_RIGHT,
-		ACTIONS.ACTION_UP, ACTIONS.ACTION_USE, ACTIONS.ACTION_NIL};
+		ACTIONS.ACTION_UP, ACTIONS.ACTION_USE};
 	private char[][] nivel;
 	private Vector2d posicionAgente;
+	
+	private ACTIONS orientacion; // GUARDA CON ESTO
 
 	private char[][] condicionSupuesta;
+	private boolean tieneLlave;
+	
 	private ACTIONS accion;
 	private char[][] efectoPredicho;
+	
+	// Esto es para usar como pesos en el grafo dirigido del planificador
 	private int cantidadUtilizada;
 	private int cantidadExito;
 
@@ -34,12 +45,15 @@ public class Teoria {
 	 *
 	 * */
 
-	public Teoria(char[][] nivel, Vector2d posicionAgente) {
-		this.nivel = nivel;
-		this.posicionAgente = posicionAgente;
+	
+	public Teoria(Perception perception) {
+		this.nivel = perception.getLevel();
+		this.posicionAgente = perception.getAgentPosition();
+		this.orientacion = perception.getAgentOrientation();
 
 		// Por ahora solo voy a ver lo que tengo inmediatamente alrededor
 		condicionSupuesta = new char[3][3];
+		this.tieneLlave = perception.tieneLlave();
 
 		Random rn = new Random();
 		int i = (rn.nextInt() & MASK) % POSIBLES.length;
@@ -56,12 +70,45 @@ public class Teoria {
 	private Teoria() {
 		this.nivel = null;
 		this.posicionAgente = null;
+		this.orientacion = ACTIONS.ACTION_NIL;
 
 		// Por ahora solo voy a ver lo que tengo inmediatamente alrededor
 		condicionSupuesta = new char[3][3];
 		efectoPredicho = new char[3][3];
+		this.tieneLlave = false;
 		this.cantidadUtilizada = 0;
 		this.cantidadExito = 0;
+	}
+	
+	public Teoria(JSONObject json) {
+		this.nivel = null;
+		this.posicionAgente = null;
+		this.orientacion = ACTIONS.ACTION_NIL;
+		this.tieneLlave = json.getBoolean("tieneLlave");
+		this.cantidadUtilizada = json.getInt("cantidadUtilizada");
+		this.cantidadExito = json.getInt("cantidadExito");
+		this.accion = json.getEnum(ACTIONS.class, "accionTeoria");
+		
+		condicionSupuesta = new char[3][3];
+		efectoPredicho = new char[3][3];
+		loadCharArray(condicionSupuesta, json.getJSONArray("condicionSupuesta"));
+		loadCharArray(efectoPredicho, json.getJSONArray("efectoPredicho"));	
+	}
+	
+	private void loadCharArray(char[][] arr, JSONArray json) {
+		int fila = 0;		
+		Iterator<Object> it = json.iterator();		
+		while (it.hasNext()) {
+			int columna = 0;
+			JSONArray row = (JSONArray) it.next();
+			Iterator<Object> col = row.iterator();			
+			while (col.hasNext()) {
+				String c = (String) col.next();
+				arr[fila][columna] = c.charAt(0);
+				columna++;
+			}
+			fila++;
+		}
 	}
 
 	private void cargarCondicionSupuesta() {
@@ -98,15 +145,73 @@ public class Teoria {
 		return accion;
 	}
 
+	private int compararArrays(char[][] teoria1, char[][] teoria2) {
+		int dif = 0;
+		for (int f = 0; f < teoria1.length; f++) {
+			for (int c = 0; c < teoria1[f].length; c++) {
+				if (teoria1[f][c] != teoria2[f][c]) {
+					dif++;
+				}
+			}
+		}
+		return dif;
+	}
+	
+	/**
+	 * Verifica diferencias en las condiciones supuestas
+	 * Si hay un char diferente, o una tiene llave y la otra no, son condiciones distintas
+	 * */
+	private boolean mismasCondicionesSupuestas(Teoria otra) {
+		int csDiferencias = compararArrays(this.condicionSupuesta, otra.condicionSupuesta);
+		return csDiferencias == 0 && (this.tieneLlave == otra.tieneLlave);
+	}
+	
+	/**
+	 * Verifica si hay diferencias en el efecto predicho de las teorias
+	 * */
+	private boolean mismoEfectoPredicho(Teoria otra) {
+		int epDiferencias = compararArrays(this.efectoPredicho, otra.efectoPredicho);
+		return epDiferencias == 0; 
+	}
+	
+	public boolean mismasCondiciones(Teoria teoriaPrevia) {
+		if (accion != teoriaPrevia.accion) {
+			return false;
+		}
+		if (this.tieneLlave != teoriaPrevia.tieneLlave) {
+			return false;
+		}
+		if (!mismasCondicionesSupuestas(teoriaPrevia)) {
+			return false;
+		}
+		if (!mismoEfectoPredicho(teoriaPrevia)) {
+			return false;
+		}
+		return true;
+	}
+	
 
-
+	/**
+	 * Una teoria es mas generica que otra si su condicion supuesta es mas 
+	 * generica que otra 
+	 * */
 	public boolean esMasGenericaQue(Teoria otra) {
+		if (this.tieneLlave != otra.tieneLlave) {
+			return false;
+		}
 		int estaTeoria = 0;
 		int otraTeoria = 0;
 		for (int f = 0; f < condicionSupuesta.length; f++) {
 			for (int c = 0; c < condicionSupuesta[f].length; c++) {
-				estaTeoria += (condicionSupuesta[f][c] == '?') ? 1 : 0;
-				otraTeoria += (otra.condicionSupuesta[f][c] == '?') ? 1 : 0;
+				if (condicionSupuesta[f][c] == '?' && otra.condicionSupuesta[f][c] != '?') {
+					estaTeoria++;
+				} else if (otra.condicionSupuesta[f][c] == '?' && condicionSupuesta[f][c] != '?') {
+					otraTeoria++;
+				} else {
+					if (condicionSupuesta[f][c] != otra.condicionSupuesta[f][c]) {
+						return false;
+					}
+				}
 			}
 		}
 		return estaTeoria > otraTeoria;
@@ -118,36 +223,23 @@ public class Teoria {
 	 * 		a) tienen mismos efectos predichos
 	 * 		o
 	 * 		b) tienen mismas condiciones supuestas
-	 *
 	 * */
 	public boolean esSimilar(Teoria otra) {
 		if (this.accion != otra.accion) {
 			return false;
 		}
-		int csDiferencias = 0;
-		for (int f = 0; f < condicionSupuesta.length; f++) {
-			for (int c = 0; c < condicionSupuesta[f].length; c++) {
-				if (this.condicionSupuesta[f][c] != otra.condicionSupuesta[f][c]) {
-					csDiferencias++;
-				}
-			}
+		if (this.tieneLlave != otra.tieneLlave) {
+			// Por ahora no voy a generalizar con teorias que se diferencian en llave, son casos bastante distintos
+			return false;
 		}
+		int csDiferencias = compararArrays(this.condicionSupuesta, otra.condicionSupuesta);
 		if (csDiferencias == 1) {
-			// Si se diferencian en solo 1 bloque de los aledanios, son similares y
-			// se puede aplicar heuristica EXCLUSION
+			// Diferencia 1 bloque, son similares => heuristica EXCLUSION 
 			return true;
 		}
-		int epSimilares = 0;
-		for (int f = 0; f < efectoPredicho.length; f++) {
-			for (int c = 0; c < efectoPredicho[f].length; c++) {
-				if (this.efectoPredicho[f][c] != otra.efectoPredicho[f][c]) {
-					epSimilares++;
-				}
-			}
-		}
+		int epSimilares = compararArrays(this.condicionSupuesta, otra.condicionSupuesta);
 		if (epSimilares == 1) {
-			// Si se diferencian en solo 1 bloque de los aledanios, son similares y
-			// se puede aplicar heuristica EXCLUSION
+			// Diferencia 1 bloque, son similares => heuristica EXCLUSION 
 			return true;
 		}
 		// Si tienen misma accion, pero no hubo match de cs o ep, no son similares
@@ -157,11 +249,12 @@ public class Teoria {
 
 	public Teoria generalizarCon(Teoria teoriaIteracionAnterior) {
 		if (!this.esSimilar(teoriaIteracionAnterior)) {
-			System.err.println("Se quizo generalizar con teorias que no son similares");
+			System.err.println("Se quiso generalizar con teorias que no son similares");
 			return null;
 		}
 		Teoria mutante = new Teoria();
 		mutante.accion = this.accion;
+		mutante.tieneLlave = this.tieneLlave;
 
 		for (int f = 0; f < this.condicionSupuesta.length; f++) {
 			for (int c = 0; c < this.condicionSupuesta[f].length; c++) {
@@ -192,58 +285,81 @@ public class Teoria {
 		if (cs && ep) {
 			System.err.println("Se modifico el efecto predicho y la condicion supuesta");
 		}
-
 		return mutante;
-
 	}
 
-	public boolean mismasCondiciones(Teoria teoriaPrevia) {
-		for (int f = 0; f < condicionSupuesta.length; f++) {
-			for (int c = 0; c < condicionSupuesta[f].length; c++) {
-				if (condicionSupuesta[f][c] != teoriaPrevia.condicionSupuesta[f][c]) {
-					return false;
-				}
-			}
-		}
-		for (int f = 0; f < efectoPredicho.length; f++) {
-			for (int c = 0; c < efectoPredicho[f].length; c++) {
-				if (efectoPredicho[f][c] != teoriaPrevia.efectoPredicho[f][c]) {
-					return false;
-				}
-			}
-		}
-		if (accion != teoriaPrevia.accion) {
-			return false;
-		}
-		return true;
-	}
-
-	public void reforzarTeoria() {
+	public void reforzarUsos() {
 		this.cantidadUtilizada++;
-		this.cantidadExito++;
 	}
-	/*
-	public String toString(){
-		StringBuilder sb = new StringBuilder("");
-		if(nivel!=null){
-			for(int i=0;i< nivel.length; i++){
-				for(int j=0;j<  nivel[i].length; j++){
-					sb.append(nivel[i][j]);
-				}
-				sb.append("\n");
+	
+	public void reforzarExitos() {
+		this.cantidadUtilizada++;
+	}
+	
+	/**
+	 * Evalua utilidad de esta teoria:
+	 * 100 => tengo llave y entro a la puerta
+	 * 90 => agarro llave
+	 * 50 => mato arania
+	 * 40 => escapo de arania (FALTA)
+	 * 10 => utilidad por defecto
+	 * 0 => muero
+	 * */
+	public int utilidad() {
+		int i,j;
+		i = 0;
+		j = 0;
+		switch (this.accion) {
+		case ACTION_DOWN:
+			i = 1;
+			j = 2;
+			break;
+		case ACTION_UP:
+			i = 1;
+			j = 0;
+			break;
+		case ACTION_LEFT:
+			i = 0;
+			j = 1;
+			break;
+		case ACTION_RIGHT:
+			i = 2;
+			j = 1;
+			break;
+		case ACTION_USE:
+			if (orientacion == ACTIONS.ACTION_DOWN) {
+				i = 1;
+				j = 2;
+			} else if (orientacion == ACTIONS.ACTION_UP) {
+				i = 1;
+				j = 0;
+			} else if (orientacion == ACTIONS.ACTION_LEFT) {
+				i = 0;
+				j = 1;
+			} else if (orientacion == ACTIONS.ACTION_RIGHT) {
+				i = 2;
+				j = 1;
+			}
+			break;
+		default:
+			break;
+		}
+		if (this.tieneLlave && condicionSupuesta[i][j] == 'g' && accion != ACTIONS.ACTION_USE) {
+			return 100;
+		}
+		if (!this.tieneLlave && condicionSupuesta[i][j] == '+' && accion != ACTIONS.ACTION_USE) {
+			return 90;
+		}
+		if (condicionSupuesta[i][j] == '2' || condicionSupuesta[i][j] == 's' || condicionSupuesta[i][j] == 'm') {
+			if (accion == ACTIONS.ACTION_USE) {
+				return 50;
+			} else {
+				return 0;
 			}
 		}
-		sb.append("\n");
-		for(int i=0;i< condicionSupuesta.length; i++){
-			for(int j=0;j<  condicionSupuesta[i].length; j++){
-				sb.append(condicionSupuesta[i][j]);
-			}
-			sb.append("\n");
-		}
-		sb.append(accionToString());
-		return sb.toString();
+		return 10;
 	}
-	 */
+
 	public String toString(){
 		StringBuilder sb = new StringBuilder("");
 		for(int i=0;i< condicionSupuesta.length; i++){
@@ -282,6 +398,27 @@ public class Teoria {
 			return "NOTH";
 		}
 		return "";
+	}
+	
+
+	public char[][] getCondicionSupuesta() {
+		return condicionSupuesta;
+	}
+	
+	public char[][] getEfectoPredicho() {
+		return efectoPredicho;
+	}
+	
+	public boolean getTieneLlave() {
+		return tieneLlave;
+	}
+	
+	public int getCantidadUtilizada() {
+		return cantidadUtilizada;
+	}
+	
+	public int getCantidadExito() {
+		return cantidadExito;
 	}
 
 

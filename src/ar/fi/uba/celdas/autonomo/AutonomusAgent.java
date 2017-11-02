@@ -17,12 +17,13 @@ public class AutonomusAgent extends AbstractPlayer {
 	public AutonomusAgent(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 		teorias = new ArrayList<Teoria>();
 		teoriaIteracionAnterior = null;
+		leerTeorias();
 	}
 
 	@Override
 	public ACTIONS act(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 		Perception perception = new Perception(stateObs);
-		Teoria teoriaLocal = new Teoria(perception.getLevel(), perception.getAgentPosition());
+		Teoria teoriaLocal = new Teoria(perception);
 		if (teoriaIteracionAnterior != null) {
 			teoriaIteracionAnterior.setEfecto(teoriaLocal);
 			agregarTeoria();
@@ -31,8 +32,7 @@ public class AutonomusAgent extends AbstractPlayer {
 			System.out.println(teoriaIteracionAnterior.toString());
 		}
 		teoriaIteracionAnterior = teoriaLocal;
-
-
+		// persistirTeorias();
 		return teoriaLocal.getAccionTeoria();
 	}
 
@@ -40,9 +40,9 @@ public class AutonomusAgent extends AbstractPlayer {
 		// Si existe teoria igual a la local, reforzar teoria
 		for (Teoria teoria : teorias) {
 			if (teoria.mismasCondiciones(teoriaIteracionAnterior)) {
-				teoria.reforzarTeoria();
+				teoria.reforzarExitos();
+				teoria.reforzarUsos();
 				System.out.println("YA HABIA TEORIA COMO LA ACTUAL: " + teoria.toString());
-				return;
 			}
 		}
 		// Si no existe teoria como la local, verificar si hay teoria similar
@@ -51,7 +51,6 @@ public class AutonomusAgent extends AbstractPlayer {
 			if (teoria.esSimilar(teoriaIteracionAnterior)) {
 				teoriaMutante = teoria.generalizarCon(teoriaIteracionAnterior);
 				System.out.println("NUEVA TEORIA MAS GENERALIZADA" + teoria.toString());
-				// TODO: No estoy seguro si deberia cortar aca o deberia seguir generalizando
 				break;
 			}
 		}
@@ -60,7 +59,24 @@ public class AutonomusAgent extends AbstractPlayer {
 			teorias.add(teoriaMutante);
 		}
 		teorias.add(teoriaIteracionAnterior);
-
+	}
+	
+	@Override
+	public void result(StateObservation stateObs, ElapsedCpuTimer elapsedCpuTimer) {
+		Perception perception = new Perception(stateObs, true);
+		if (teoriaIteracionAnterior != null) {
+			Teoria fin = new Teoria(perception);
+			teoriaIteracionAnterior.setEfecto(fin);
+		}
+		persistirTeorias();
+	}
+	
+	private void leerTeorias() {
+		this.teorias = ParserTeorias.leerTeorias();
+	}
+	
+	private void persistirTeorias() {
+		ParserTeorias.persistirTeorias(teorias);		
 	}
 
 

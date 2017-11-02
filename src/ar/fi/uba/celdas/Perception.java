@@ -152,6 +152,101 @@ public class Perception {
 		pathFinder = new PathFinder(new ArrayList<Integer>(obstacleTypes));
 		pathFinder.run(stateObs);
 	}
+	
+	public Perception(StateObservation stateObs, boolean endGame){
+		ArrayList<Observation>[][] grid = stateObs.getObservationGrid();
+		ArrayList<Observation> observationList;
+		Observation o;
+		this.sizeWorldWidthInPixels= stateObs.getWorldDimension().width;
+		this.sizeWorldHeightInPixels= stateObs.getWorldDimension().height;
+		this.levelWidth = stateObs.getObservationGrid().length;
+		this.levelHeight = stateObs.getObservationGrid()[0].length;
+		this.spriteSizeWidthInPixels =  stateObs.getWorldDimension().width / levelWidth;
+		this.spriteSizeHeightInPixels =  stateObs.getWorldDimension().height / levelHeight;
+		Set<Integer> obstacleTypes = new HashSet<Integer>();
+		this.level = new char[levelHeight][levelWidth];
+		for(int i=0;i< levelWidth; i++){
+			for(int j=0;j< levelHeight; j++){
+				observationList = (grid[i][j]);
+				if(!observationList.isEmpty()){
+					o = observationList.get(observationList.size()-1);
+					String element =  o.category+""+o.itype;
+
+					switch (element) {
+					case "40": this.level[j][i] = 'w';
+					obstacleTypes.add(o.itype);
+					break;
+					case "44": this.level[j][i] = '+';
+					// nextItem = new Vector2d(j,i);
+					keyItemPosition = new Vector2d(j,i);
+					break;
+					case "08":
+					case "07": this.level[j][i] = 'A';
+					agentPosition = new Vector2d(j,i);
+					agentOrientation = new Vector2d(stateObs.getAvatarOrientation());
+					// pathFinder = new PathFinder();
+					//System.out.println("Pos: " + agentPosition);
+					//System.out.println("Orient: " + stateObs.getAvatarOrientation());
+					break;
+
+					case "311": this.level[j][i] = '2';
+					obstacleTypes.add(o.itype);
+					someEnemyPosition = new Vector2d(j,i);
+					break;
+					case "312": this.level[j][i] = 's';
+					obstacleTypes.add(o.itype);
+					someEnemyPosition = new Vector2d(j,i);
+					break;
+					case "310": this.level[j][i] = 'm';
+					obstacleTypes.add(o.itype);
+					someEnemyPosition = new Vector2d(j,i);
+					break;
+					case "23": this.level[j][i] = 'g';
+					doorItemPosition = new Vector2d(j,i);
+					break;
+
+					case "55": this.level[j][i] = 'X'; break;
+					default: this.level[j][i] = '?';
+					unknownObject = new Vector2d(j,i);
+					//System.out.println("Que hay en: " + i + "," +j);
+					//System.out.println(o.category + "," + o.itype);
+					break;
+
+					}
+				}else{
+					this.level[j][i] = '.';
+				}
+			}
+		}
+	}
+	
+	public ACTIONS getAgentOrientation() {
+		if (agentOrientation == null) {
+			return ACTIONS.ACTION_NIL;
+		}
+		if (agentOrientation.x == -1 && agentOrientation.y == 0) {
+			return ACTIONS.ACTION_LEFT;
+		}
+		if (agentOrientation.x == 0 && agentOrientation.y == 1) {
+			return ACTIONS.ACTION_DOWN;
+		}
+		if (agentOrientation.x == 1 && agentOrientation.y == 0) {
+			return ACTIONS.ACTION_RIGHT;
+		}
+		if (agentOrientation.x == 0 && agentOrientation.y == -1) {
+			return ACTIONS.ACTION_UP;
+		}
+		return ACTIONS.ACTION_NIL;
+	}
+	
+	
+	
+	public boolean tieneLlave() {
+		if (agentPosition == null) {
+			return false;
+		}
+		return keyItemPosition == null || agentPosition.equals(keyItemPosition);
+	}
 
 	public char getAt(int i, int j){
 		return level[i][j];
@@ -351,5 +446,7 @@ public class Perception {
 	public Vector2d getAgentPosition() {
 		return agentPosition;
 	}
+
+	
 
 }
