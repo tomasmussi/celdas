@@ -8,3 +8,4 @@ src/tools/.DS_Store
 /bin/
 .classpath
 .project
+.settings
