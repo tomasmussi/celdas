@@ -20,7 +20,7 @@ public class ParserTeorias {
 	public static List<Teoria> leerTeorias() {
 		List<Teoria> teorias = new ArrayList<Teoria>();
 		try {
-			String teoriasFile = "/home/tomas/Desktop/teorias.json";
+			String teoriasFile = "/home/tomas/Escritorio/teorias.json";
 			InputStream fstream = new FileInputStream(new File(teoriasFile));		
 
 			int content;
@@ -54,7 +54,7 @@ public class ParserTeorias {
 			JSONObject js = new JSONObject();
 			js.put("teorias", teorias);
 		
-			String teoriasFile = "/home/tomas/Desktop/teorias.json";
+			String teoriasFile = "/home/tomas/Escritorio/teorias.json";
 			File file;
 			file = new File(teoriasFile);
 			OutputStream output = new FileOutputStream(file);

@@ -3,16 +3,22 @@ package ar.fi.uba.celdas.autonomo;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 
 import ontology.Types.ACTIONS;
+import ar.fi.uba.celdas.autonomo.grafo.DijkstraAlgorithm;
+import ar.fi.uba.celdas.autonomo.grafo.Edge;
+import ar.fi.uba.celdas.autonomo.grafo.Graph;
+import ar.fi.uba.celdas.autonomo.grafo.Vertex;
 
 public class Planificador {
 
 	private List<Teoria> teorias;
-	private char[][] condicionActual;
-	private boolean tieneLlave;
+	private Teoria actual;
 
 	private PriorityQueue<Teoria> objetivos;
 	private boolean hayPlan;
@@ -21,10 +27,9 @@ public class Planificador {
 	private boolean hayTeoriaUtil;
 	private Teoria teoriaUtil;
 	
-	public Planificador(List<Teoria> teorias, char[][] condicionActual, boolean tieneLlave, int utilidad) {
+	public Planificador(List<Teoria> teorias, Teoria actual) {
 		this.teorias = teorias;
-		this.condicionActual = condicionActual;
-		this.tieneLlave = tieneLlave;
+		this.actual = actual;
 		
 		this.hayPlan = false;
 		this.objetivos = new PriorityQueue<Teoria>(new Comparator<Teoria>() {
@@ -37,14 +42,14 @@ public class Planificador {
 		this.teoriaUtil = null;
 		buscarPlan();
 		if (!hayPlan) {
-			buscarTeoriaUtil(utilidad);
+			buscarTeoriaUtil(30);
 		}
 	}
 	
 	private void buscarTeoriaUtil(int utilidad) {
 		teoriaUtil = null;
 		for (Teoria teoria : teorias) {
-			if (teoria.utilidad() > utilidad && teoria.tieneCondicionSupuesta(condicionActual, tieneLlave)) {
+			if (teoria.utilidad() > utilidad && teoria.tieneCondicionSupuesta(actual.getCondicionSupuesta(), actual.getTieneLlave())) {
 				hayTeoriaUtil = true;
 				utilidad = teoria.utilidad();
 				teoriaUtil = teoria;
@@ -53,49 +58,69 @@ public class Planificador {
 	}
 
 	private void buscarPlan() {
+		List<Edge> conexiones = new ArrayList<Edge>();
+		Map<Integer, Vertex> mapa = new HashMap<Integer, Vertex>();
+		Map<Integer, Teoria> mapaTeorias = new HashMap<Integer, Teoria>();
+		Map<Vertex,Integer> mapaInvertido = new HashMap<Vertex,Integer>();
 		for (Teoria teoria : teorias) {
-			if (teoria.utilidad() >= 90) {
-				objetivos.add(teoria);				
-			}
-			if (teoria.tieneLlave()) {
-				
-			}
+			Vertex vertex = new Vertex(String.valueOf(teoria.getId()), String.valueOf(teoria.getId()));
+			mapa.put(teoria.getId(), vertex);
+			mapaTeorias.put(teoria.getId(), teoria);
+			mapaInvertido.put(vertex, teoria.getId());
 		}
-		while (!objetivos.isEmpty() && !hayPlan) {
-			Teoria objetivo = objetivos.poll();
-			hayPlan = armarPlan(objetivo);
-		}
-	}
-	
-	private boolean armarPlan(Teoria objetivo) {
-		List<Teoria> plan = new ArrayList<Teoria>();
-		plan.add(objetivo);
-		boolean continuar = true;
-		Teoria eslabon = objetivo;
-		int iteracion = 0;
-		while (continuar && iteracion <= 100) {
-			continuar = false;
-			for (Teoria teoria : teorias) {
-				if (teoria.tieneComoEfecto(eslabon)) {
-					plan.add(teoria);
-					continuar = true;
-					eslabon = teoria;
-					break;
+		String idAct = "actual";
+		Vertex actualVertex = new Vertex(idAct, idAct);
+		mapa.put(Integer.valueOf(0), actualVertex);
+		mapaTeorias.put(Integer.valueOf(0), actual);
+		for (Teoria teoria : teorias) {			
+			for (Teoria otro : teorias) {
+				if (teoria.siguientePaso(otro)) {
+					String id = String.valueOf(teoria.getId()) + "+" +String.valueOf(otro.getId());
+					int peso = 100 - teoria.cociente();
+					conexiones.add(new Edge(id, mapa.get(teoria.getId()), mapa.get(otro.getId()), peso));
 				}
 			}
-
-			// Encontre una teoria que puede usarse, verifico si es igual a mi situacion actual
-			if (eslabon.tieneCondicionSupuesta(condicionActual, tieneLlave)) {
-				// Logre obtener un plan
-				hayPlan = true;
-				this.plan = new ArrayList<Teoria>(plan);
-				Collections.reverse(this.plan);
-				return true;
+			if (teoria.utilidad() > 90) {
+				objetivos.add(teoria);				
 			}
-			iteracion++;
+			if (teoria.utilidad() >= 90 && !actual.tieneLlave()) {
+				objetivos.add(teoria);
+			}
+			/*
+			if (teoria.tieneLlave()) {
+				
+			}*/
 		}
-		return false;	
+		for (Teoria teoria : teorias) {
+			if (teoria.tieneCondicionSupuesta(actual.getCondicionSupuesta(), actual.getTieneLlave())) {				
+				String id = String.valueOf(teoria.getId()) + "+" +String.valueOf(actual.getId());
+				int peso = 100 - teoria.cociente();
+				conexiones.add(new Edge(id, actualVertex, mapa.get(teoria.getId()), peso));
+			}
+		}
+		Graph grafo = new Graph(new ArrayList<Vertex>(mapa.values()), conexiones);
+		DijkstraAlgorithm dijkstra = new DijkstraAlgorithm(grafo);
+		while (!objetivos.isEmpty() && !hayPlan) {
+			Teoria objetivo = objetivos.poll();
+			dijkstra.execute(actualVertex);
+			LinkedList<Vertex> path = dijkstra.getPath(mapa.get(objetivo.getId()));
+			if (path != null) {
+				hayPlan = !path.isEmpty();
+				if (hayPlan) {
+					this.plan = new ArrayList<Teoria>();
+					for (Vertex vertex : path) {
+						Integer id = mapaInvertido.get(vertex);
+						if (id != null) {
+							plan.add(mapaTeorias.get(id));						
+						} else {
+							System.out.println("por que null???");
+						}
+					}
+				}				
+			}			
+		}
 	}
+
 
 	public boolean hayPlan() {
 		return hayPlan;
@@ -112,7 +137,10 @@ public class Planificador {
 	}
 
 	public ACTIONS dameAccionTeoriaUtil() {
-		return teoriaUtil.getAccionTeoria();
+		if (teoriaUtil != null) {
+			return teoriaUtil.getAccionTeoria();
+		}
+		return actual.getAccionTeoria();
 	}
 
 	/**

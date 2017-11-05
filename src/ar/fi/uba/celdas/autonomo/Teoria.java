@@ -1,13 +1,13 @@
 package ar.fi.uba.celdas.autonomo;
 
-import java.text.AttributedCharacterIterator;
 import java.util.Iterator;
 import java.util.Random;
+
+import ontology.Types.ACTIONS;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import ontology.Types.ACTIONS;
 import tools.Vector2d;
 import ar.fi.uba.celdas.Perception;
 
@@ -31,6 +31,9 @@ public class Teoria {
 	// Esto es para usar como pesos en el grafo dirigido del planificador
 	private int cantidadUtilizada;
 	private int cantidadExito;
+	
+	
+	private Integer id;
 
 	/*Legend:
 	 *  w: WALL
@@ -47,7 +50,7 @@ public class Teoria {
 	 * */
 
 	
-	public Teoria(Perception perception) {
+	public Teoria(Perception perception, Integer id) {
 		this.nivel = perception.getLevel();
 		this.posicionAgente = perception.getAgentPosition();
 		this.orientacion = perception.getAgentOrientation();
@@ -64,11 +67,13 @@ public class Teoria {
 
 		this.cantidadUtilizada = 0;
 		this.cantidadExito = 0;
+		
+		this.id = id;
 
 		cargarCondicionSupuesta();
 	}
 
-	private Teoria() {
+	private Teoria(Integer id) {
 		this.nivel = null;
 		this.posicionAgente = null;
 		this.orientacion = ACTIONS.ACTION_NIL;
@@ -79,6 +84,7 @@ public class Teoria {
 		this.tieneLlave = false;
 		this.cantidadUtilizada = 0;
 		this.cantidadExito = 0;
+		this.id = id;
 	}
 	
 	public Teoria(JSONObject json) {
@@ -89,6 +95,7 @@ public class Teoria {
 		this.cantidadUtilizada = json.getInt("cantidadUtilizada");
 		this.cantidadExito = json.getInt("cantidadExito");
 		this.accion = json.getEnum(ACTIONS.class, "accionTeoria");
+		this.id = json.getInt("id");
 		
 		condicionSupuesta = new char[3][3];
 		efectoPredicho = new char[3][3];
@@ -269,12 +276,12 @@ public class Teoria {
 	}
 
 
-	public Teoria generalizarCon(Teoria teoriaIteracionAnterior) {
+	public Teoria generalizarCon(Teoria teoriaIteracionAnterior, Integer nextId) {
 		if (!this.esSimilar(teoriaIteracionAnterior)) {
 			System.err.println("Se quiso generalizar con teorias que no son similares");
 			return null;
 		}
-		Teoria mutante = new Teoria();
+		Teoria mutante = new Teoria(nextId);
 		mutante.accion = this.accion;
 		mutante.tieneLlave = this.tieneLlave;
 		mutante.cantidadExito = this.cantidadExito;
@@ -561,6 +568,19 @@ public class Teoria {
 		}
 		return true;
 	}
+	
+	public boolean siguientePaso(Teoria eslabon) {	
+		for (int f = 0; f < this.efectoPredicho.length; f++) {
+			for (int c = 0; c < this.efectoPredicho[f].length; c++) {
+				if (this.efectoPredicho[f][c] != '?' && eslabon.condicionSupuesta[f][c] != '?') {
+					if (this.efectoPredicho[f][c] != eslabon.condicionSupuesta[f][c]) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
 
 	public boolean tieneCondicionSupuesta(char[][] condicionActual, boolean tieneLlave2) {
 		if (this.tieneLlave != tieneLlave2) {
@@ -587,6 +607,17 @@ public class Teoria {
 			}
 		}
 		return false;
+	}
+	
+	public Integer getId() {
+		return id;
+	}
+	
+	public int cociente() {
+		if (cantidadUtilizada == 0) {
+			return 0;
+		}
+		return 100 * (cantidadExito / cantidadUtilizada);
 	}
 
 

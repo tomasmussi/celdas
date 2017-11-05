@@ -14,17 +14,20 @@ public class AutonomusAgent extends AbstractPlayer {
 	private List<Teoria> teorias;
 	private Teoria teoriaIteracionAnterior;
 	private Planificador planTransitorio;
+	private Integer nextId;
 
 	public AutonomusAgent(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 		teorias = new ArrayList<Teoria>();
 		teoriaIteracionAnterior = null;
+		nextId = Integer.valueOf(1); 
 		leerTeorias();
 	}
 
 	@Override
 	public ACTIONS act(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 		Perception perception = new Perception(stateObs);
-		Teoria teoriaLocal = new Teoria(perception);
+		Teoria teoriaLocal = new Teoria(perception, nextId);
+		nextId++;
 		if (teoriaIteracionAnterior != null) {
 			teoriaIteracionAnterior.setEfecto(teoriaLocal);
 			agregarTeoria();
@@ -39,7 +42,7 @@ public class AutonomusAgent extends AbstractPlayer {
 				planTransitorio = null;
 			}			
 		}
-		Planificador plan = new Planificador(teorias, teoriaIteracionAnterior.getCondicionSupuesta(), teoriaIteracionAnterior.getTieneLlave(), teoriaIteracionAnterior.utilidad());
+		Planificador plan = new Planificador(teorias, teoriaLocal);
 		if (plan.hayPlan()) {
 			ACTIONS accion = plan.dameAccionPlan();
 			planTransitorio = plan;
@@ -68,7 +71,9 @@ public class AutonomusAgent extends AbstractPlayer {
 			// Busco generalizar
 			if (!teoria.mismasCondiciones(teoriaIteracionAnterior) && teoria.esSimilar(teoriaIteracionAnterior)) {
 				// Es similar, pero no la misma
-				teoriaMutante = teoria.generalizarCon(teoriaIteracionAnterior);
+				teoriaMutante = teoria.generalizarCon(teoriaIteracionAnterior, nextId);
+				// TODO: DESCOMENTAR CUANDO SE AGREGUEN TEORIAS MUTANTES
+				nextId++;
 			}
 			// Busco mismas condiciones supuestas y accion, pero efectos predichos distintos
 			if (teoria.distintosEfectos(teoriaIteracionAnterior)) {
@@ -77,7 +82,8 @@ public class AutonomusAgent extends AbstractPlayer {
 			}
 		}
 		if (teoriaMutante != null) {
-			// teorias.add(teoriaMutante);
+			// TODO: DESCOMENTAR CUANDO SE AGREGUEN TEORIAS MUTANTES
+			teorias.add(teoriaMutante);
 		}
 		if (agregarTeoriaNueva) {
 			teorias.add(teoriaIteracionAnterior);
@@ -96,6 +102,9 @@ public class AutonomusAgent extends AbstractPlayer {
 	
 	private void leerTeorias() {
 		this.teorias = ParserTeorias.leerTeorias();
+		if (!teorias.isEmpty()) {
+			nextId = teorias.get(teorias.size() - 1).getId() + 1;			
+		}		
 	}
 	
 	private void persistirTeorias() {
