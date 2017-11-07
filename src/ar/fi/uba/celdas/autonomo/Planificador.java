@@ -80,10 +80,10 @@ public class Planificador {
 					conexiones.add(new Edge(id, mapa.get(teoria.getId()), mapa.get(otro.getId()), peso));
 				}
 			}
-			if (teoria.utilidad() > 90 && actual.getTieneLlave()) {
+			if (teoria.utilidad() == 100 && actual.getTieneLlave()) {
 				objetivos.add(teoria);				
 			}
-			if (teoria.utilidad() >= 90 && !actual.getTieneLlave()) {
+			if (teoria.utilidad() == 90 && !actual.getTieneLlave()) {
 				objetivos.add(teoria);
 			}
 		}
