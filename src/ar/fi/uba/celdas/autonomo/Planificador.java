@@ -68,7 +68,7 @@ public class Planificador {
 			mapaTeorias.put(teoria.getId(), teoria);
 			mapaInvertido.put(vertex, teoria.getId());
 		}
-		String idAct = "actual";
+		String idAct = "0";
 		Vertex actualVertex = new Vertex(idAct, idAct);
 		mapa.put(Integer.valueOf(0), actualVertex);
 		mapaTeorias.put(Integer.valueOf(0), actual);
@@ -76,26 +76,27 @@ public class Planificador {
 			for (Teoria otro : teorias) {
 				if (teoria.siguientePaso(otro)) {
 					String id = String.valueOf(teoria.getId()) + "+" +String.valueOf(otro.getId());
-					int peso = 100 - teoria.cociente();
+					int peso = 200 - teoria.cociente();
 					conexiones.add(new Edge(id, mapa.get(teoria.getId()), mapa.get(otro.getId()), peso));
 				}
 			}
-			if (teoria.utilidad() > 90) {
+			if (teoria.utilidad() > 90 && actual.getTieneLlave()) {
 				objetivos.add(teoria);				
 			}
-			if (teoria.utilidad() >= 90 && !actual.tieneLlave()) {
+			if (teoria.utilidad() >= 90 && !actual.getTieneLlave()) {
 				objetivos.add(teoria);
 			}
-			/*
-			if (teoria.tieneLlave()) {
-				
-			}*/
 		}
+		int cociente = -1;
 		for (Teoria teoria : teorias) {
 			if (teoria.tieneCondicionSupuesta(actual.getCondicionSupuesta(), actual.getTieneLlave())) {				
 				String id = String.valueOf(teoria.getId()) + "+" +String.valueOf(actual.getId());
-				int peso = 100 - teoria.cociente();
+				int peso = 200 - teoria.cociente();
 				conexiones.add(new Edge(id, actualVertex, mapa.get(teoria.getId()), peso));
+				if (teoria.cociente() > cociente) {
+					cociente = teoria.cociente();
+					actual = teoria;					
+				}
 			}
 		}
 		Graph grafo = new Graph(new ArrayList<Vertex>(mapa.values()), conexiones);
@@ -113,7 +114,7 @@ public class Planificador {
 						if (id != null) {
 							plan.add(mapaTeorias.get(id));						
 						} else {
-							System.out.println("por que null???");
+							// plan.add(actual);
 						}
 					}
 				}				

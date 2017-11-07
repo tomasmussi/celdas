@@ -1,0 +1,198 @@
+{"teorias":[
+	{"accionTeoria":"ACTION_RIGHT",
+	"cantidadUtilizada":2,
+	"id":1,
+	"efectoPredicho":[
+		["w","w","w"],
+		["w","A","."],
+		["w",".","."]],
+	"cantidadExito":2,
+	"tieneLlave":false,
+	"condicionSupuesta":[
+		["w","w","w"],
+		["w","A","."],
+		["w",".","."]]
+},
+{"accionTeoria":"ACTION_RIGHT",
+	"cantidadUtilizada":2,
+	"id":2,
+	"efectoPredicho":[
+		["w","w","w"],
+		[".","A","."],
+		[".",".","w"]],
+	"cantidadExito":2,
+	"tieneLlave":false,
+	"condicionSupuesta":[
+		["w","w","w"],
+		["w","A","."],
+		["w",".","."]]
+},
+{"accionTeoria":"ACTION_RIGHT",
+	"cantidadUtilizada":2,
+	"id":3,
+	"efectoPredicho":[
+		["w","w","w"],
+		[".","A","."],
+		[".","w","."]],
+	"cantidadExito":1,
+	"tieneLlave":false,
+	"condicionSupuesta":[
+		["w","w","w"],
+		[".","A","."],
+		[".",".","w"]]
+},
+{"accionTeoria":"ACTION_RIGHT",
+	"cantidadUtilizada":2,
+	"id":4,
+	"efectoPredicho":[
+		["w","w","w"],
+		[".","A","."],
+		["w",".","."]],
+	"cantidadExito":1,
+	"tieneLlave":false,
+	"condicionSupuesta":[
+		["w","w","w"],
+		[".","A","."],
+		[".","w","."]]
+},
+{"accionTeoria":"ACTION_RIGHT",
+	"cantidadUtilizada":2,
+	"id":5,
+	"efectoPredicho":[
+		["w","w","w"],
+		[".","A","."],
+		[".",".","."]],
+	"cantidadExito":1,
+	"tieneLlave":false,
+	"condicionSupuesta":[
+		["w","w","w"],
+		[".","A","."],
+		["w",".","."]]
+},
+{"accionTeoria":"ACTION_RIGHT",
+	"cantidadUtilizada":10,
+	"id":6,
+	"efectoPredicho":[
+		["w","w","w"],
+		[".","A","."],
+		[".",".","."]],
+	"cantidadExito":10,
+	"tieneLlave":false,
+	"condicionSupuesta":[
+		["w","w","w"],
+		[".","A","."],
+		[".",".","."]]
+},
+{"accionTeoria":"ACTION_RIGHT",
+	"cantidadUtilizada":2,
+	"id":7,
+	"efectoPredicho":[
+		["w","w","w"],
+		[".","A","w"],
+		[".",".","."]],
+	"cantidadExito":1,
+	"tieneLlave":false,
+	"condicionSupuesta":[
+		["w","w","w"],
+		[".","A","."],
+		[".",".","."]]
+},
+{"accionTeoria":"ACTION_DOWN",
+	"cantidadUtilizada":2,
+	"id":8,
+	"efectoPredicho":[
+		[".",".","w"],
+		[".","A","."],
+		[".","w","."]],
+	"cantidadExito":1,
+	"tieneLlave":false,
+	"condicionSupuesta":[
+		["w","w","w"],
+		[".","A","w"],
+		[".",".","."]]
+},
+{"accionTeoria":"ACTION_RIGHT",
+	"cantidadUtilizada":2,
+	"id":9,
+	"efectoPredicho":[
+		[".","w","."],
+		[".","A","."],
+		["w",".","+"]],
+	"cantidadExito":1,
+	"tieneLlave":false,
+	"condicionSupuesta":[
+		[".",".","w"],
+		[".","A","."],
+		[".","w","."]]
+},
+{"accionTeoria":"ACTION_RIGHT",
+	"cantidadUtilizada":2,
+	"id":10,
+	"efectoPredicho":[
+		["w",".","."],
+		[".","A","."],
+		[".","+","w"]],
+	"cantidadExito":2,
+	"tieneLlave":false,
+	"condicionSupuesta":[
+		[".","w","."],
+		[".","A","."],
+		["w",".","+"]]
+},
+{"accionTeoria":"ACTION_DOWN",
+	"cantidadUtilizada":2,
+	"id":11,
+	"efectoPredicho":[
+		[".",".","."],
+		[".","A","w"],
+		["w","w","w"]],
+	"cantidadExito":2,
+	"tieneLlave":false,
+	"condicionSupuesta":[
+		["w",".","."],
+		[".","A","."],
+		[".","+","w"]]
+},
+{"accionTeoria":"ACTION_LEFT",
+	"cantidadUtilizada":2,
+	"id":12,
+	"efectoPredicho":[
+		[".",".","."],
+		[".","A","w"],
+		["w","w","w"]],
+	"cantidadExito":2,
+	"tieneLlave":true,
+	"condicionSupuesta":[
+		[".",".","."],
+		[".","A","w"],
+		["w","w","w"]]
+},
+{"accionTeoria":"ACTION_LEFT",
+	"cantidadUtilizada":2,
+	"id":13,
+	"efectoPredicho":[
+		[".",".","."],
+		["w","A","."],
+		["w","w","w"]],
+	"cantidadExito":2,
+	"tieneLlave":true,
+	"condicionSupuesta":[
+		[".",".","."],
+		[".","A","w"],
+		["w","w","w"]]
+},
+{"accionTeoria":"ACTION_UP",
+	"cantidadUtilizada":1000,
+	"id":14,
+	"efectoPredicho":[
+		["w","w","w"],
+		[".","A","."],
+		[".",".","."]],
+	"cantidadExito":1000,
+	"tieneLlave":true,
+	"condicionSupuesta":[
+		[".","g","."],
+		[".","A","."],
+		[".",".","."]]
+}
+]}

@@ -286,6 +286,7 @@ public class Teoria {
 		mutante.tieneLlave = this.tieneLlave;
 		mutante.cantidadExito = this.cantidadExito;
 		mutante.cantidadUtilizada = this.cantidadUtilizada;
+		mutante.orientacion = this.orientacion;
 
 		for (int f = 0; f < this.condicionSupuesta.length; f++) {
 			for (int c = 0; c < this.condicionSupuesta[f].length; c++) {
@@ -304,6 +305,9 @@ public class Teoria {
 					cs = true;
 				}
 			}
+		}
+		if (cs) {
+			return mutante;
 		}
 		for (int f = 0; f < this.efectoPredicho.length; f++) {
 			for (int c = 0; c < this.efectoPredicho[f].length; c++) {
@@ -597,17 +601,6 @@ public class Teoria {
 		}
 		return true;
 	}
-
-	public boolean tieneLlave() {
-		for (int f = 0; f < this.condicionSupuesta.length; f++) {
-			for (int c = 0; c < this.condicionSupuesta[f].length; c++) {
-				if (condicionSupuesta[f][c] == '+' || efectoPredicho[f][c] == '+' && accion == ACTIONS.ACTION_DOWN) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
 	
 	public Integer getId() {
 		return id;
@@ -617,7 +610,7 @@ public class Teoria {
 		if (cantidadUtilizada == 0) {
 			return 0;
 		}
-		return 100 * (cantidadExito / cantidadUtilizada);
+		return (100 * cantidadExito) / cantidadUtilizada;
 	}
 
 

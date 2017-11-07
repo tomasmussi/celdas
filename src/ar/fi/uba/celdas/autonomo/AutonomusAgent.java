@@ -40,8 +40,9 @@ public class AutonomusAgent extends AbstractPlayer {
 				return planTransitorio.dameAccionPlan();				
 			} else {
 				planTransitorio = null;
-			}			
+			}		
 		}
+
 		Planificador plan = new Planificador(teorias, teoriaLocal);
 		if (plan.hayPlan()) {
 			ACTIONS accion = plan.dameAccionPlan();
@@ -72,8 +73,6 @@ public class AutonomusAgent extends AbstractPlayer {
 			if (!teoria.mismasCondiciones(teoriaIteracionAnterior) && teoria.esSimilar(teoriaIteracionAnterior)) {
 				// Es similar, pero no la misma
 				teoriaMutante = teoria.generalizarCon(teoriaIteracionAnterior, nextId);
-				// TODO: DESCOMENTAR CUANDO SE AGREGUEN TEORIAS MUTANTES
-				nextId++;
 			}
 			// Busco mismas condiciones supuestas y accion, pero efectos predichos distintos
 			if (teoria.distintosEfectos(teoriaIteracionAnterior)) {
@@ -83,7 +82,8 @@ public class AutonomusAgent extends AbstractPlayer {
 		}
 		if (teoriaMutante != null) {
 			// TODO: DESCOMENTAR CUANDO SE AGREGUEN TEORIAS MUTANTES
-			teorias.add(teoriaMutante);
+			//nextId++;
+			//teorias.add(teoriaMutante);
 		}
 		if (agregarTeoriaNueva) {
 			teorias.add(teoriaIteracionAnterior);
