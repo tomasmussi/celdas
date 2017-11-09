@@ -13,54 +13,102 @@ public class AutonomusAgent extends AbstractPlayer {
 
 	private List<Teoria> teorias;
 	private Teoria teoriaIteracionAnterior;
+	private Planificador planTransitorio;
+	private Integer nextId;
 
 	public AutonomusAgent(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 		teorias = new ArrayList<Teoria>();
 		teoriaIteracionAnterior = null;
+		nextId = Integer.valueOf(1); 
+		leerTeorias();
 	}
 
 	@Override
 	public ACTIONS act(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 		Perception perception = new Perception(stateObs);
-		Teoria teoriaLocal = new Teoria(perception.getLevel(), perception.getAgentPosition());
+		Teoria teoriaLocal = new Teoria(perception, nextId);
+		nextId++;
 		if (teoriaIteracionAnterior != null) {
 			teoriaIteracionAnterior.setEfecto(teoriaLocal);
 			agregarTeoria();
 		}
-		if (teoriaIteracionAnterior != null) {
-			System.out.println(teoriaIteracionAnterior.toString());
-		}
 		teoriaIteracionAnterior = teoriaLocal;
 
+		// Planificar
+		if (planTransitorio != null) {
+			if (planTransitorio.todaviaSirve(teoriaLocal)) {
+				return planTransitorio.dameAccionPlan();				
+			} else {
+				planTransitorio = null;
+			}		
+		}
 
+		Planificador plan = new Planificador(teorias, teoriaLocal);
+		if (plan.hayPlan()) {
+			ACTIONS accion = plan.dameAccionPlan();
+			planTransitorio = plan;
+			return accion;
+		} else if (plan.hayTeoriaUtil()) {
+			return plan.dameAccionTeoriaUtil();
+		}
 		return teoriaLocal.getAccionTeoria();
 	}
 
 	private void agregarTeoria() {
+		teoriaIteracionAnterior.reforzarExitos(); // No mori al usar la teoria
+		teoriaIteracionAnterior.reforzarUsos(); // Use la teoria
+		boolean agregarTeoriaNueva = true;
 		// Si existe teoria igual a la local, reforzar teoria
 		for (Teoria teoria : teorias) {
 			if (teoria.mismasCondiciones(teoriaIteracionAnterior)) {
-				teoria.reforzarTeoria();
-				System.out.println("YA HABIA TEORIA COMO LA ACTUAL: " + teoria.toString());
-				return;
+				teoria.reforzarExitos();
+				teoria.reforzarUsos();
+				agregarTeoriaNueva = false;
+				break; // No deberia encontrar mas teorias iguales, deberian ser unicas
 			}
 		}
-		// Si no existe teoria como la local, verificar si hay teoria similar
 		Teoria teoriaMutante = null;
 		for (Teoria teoria : teorias) {
-			if (teoria.esSimilar(teoriaIteracionAnterior)) {
-				teoriaMutante = teoria.generalizarCon(teoriaIteracionAnterior);
-				System.out.println("NUEVA TEORIA MAS GENERALIZADA" + teoria.toString());
-				// TODO: No estoy seguro si deberia cortar aca o deberia seguir generalizando
-				break;
+			// Busco generalizar
+			if (!teoria.mismasCondiciones(teoriaIteracionAnterior) && teoria.esSimilar(teoriaIteracionAnterior)) {
+				// Es similar, pero no la misma
+				teoriaMutante = teoria.generalizarCon(teoriaIteracionAnterior, nextId);
+			}
+			// Busco mismas condiciones supuestas y accion, pero efectos predichos distintos
+			if (teoria.distintosEfectos(teoriaIteracionAnterior)) {
+				teoria.reforzarUsos();
+				teoriaIteracionAnterior.copiarUsos(teoria);
 			}
 		}
 		if (teoriaMutante != null) {
-			System.out.println("Agregando a la lista...");
-			teorias.add(teoriaMutante);
+			// TODO: DESCOMENTAR CUANDO SE AGREGUEN TEORIAS MUTANTES
+			//nextId++;
+			//teorias.add(teoriaMutante);
 		}
-		teorias.add(teoriaIteracionAnterior);
-
+		if (agregarTeoriaNueva) {
+			teorias.add(teoriaIteracionAnterior);
+		}
+	}
+	
+	@Override
+	public void result(StateObservation stateObs, ElapsedCpuTimer elapsedCpuTimer) {
+		Perception perception = new Perception(stateObs, true);
+		if (teoriaIteracionAnterior != null) {
+			teoriaIteracionAnterior.setEfecto(perception);
+			teoriaIteracionAnterior.reforzarUsos();
+		}
+		persistirTeorias();
+	}
+	
+	private void leerTeorias() {
+		this.teorias = ParserTeorias.leerTeorias();
+		if (!teorias.isEmpty()) {
+			nextId = teorias.get(teorias.size() - 1).getId() + 1;			
+		}		
+	}
+	
+	private void persistirTeorias() {
+		ParserTeorias.persistirTeorias(teorias);		
 	}
 
 
