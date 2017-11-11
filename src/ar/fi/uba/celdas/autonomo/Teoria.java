@@ -182,6 +182,21 @@ public class Teoria {
 		return dif;
 	}
 	
+	private int compararArraysEsquinas(char[][] teoria1, char[][] teoria2) {
+		int dif = 0;
+		for (int f = 0; f < teoria1.length; f++) {
+			for (int c = 0; c < teoria1[f].length; c++) {
+				if (f == 1 || c == 1){
+					continue;
+				}
+				if (teoria1[f][c] != teoria2[f][c]) {
+					dif++;
+				}
+			}
+		}
+		return dif;
+	}
+	
 	/**
 	 * Verifica diferencias en las condiciones supuestas
 	 * Si hay un char diferente, o una tiene llave y la otra no, son condiciones distintas
@@ -261,12 +276,12 @@ public class Teoria {
 			// Por ahora no voy a generalizar con teorias que se diferencian en llave, son casos bastante distintos
 			return false;
 		}
-		int csDiferencias = compararArrays(this.condicionSupuesta, otra.condicionSupuesta);
+		int csDiferencias = compararArraysEsquinas(this.condicionSupuesta, otra.condicionSupuesta);
 		if (csDiferencias == 1) {
 			// Diferencia 1 bloque, son similares => heuristica EXCLUSION 
 			return true;
 		}
-		int epSimilares = compararArrays(this.condicionSupuesta, otra.condicionSupuesta);
+		int epSimilares = compararArraysEsquinas(this.condicionSupuesta, otra.condicionSupuesta);
 		if (epSimilares == 1) {
 			// Diferencia 1 bloque, son similares => heuristica EXCLUSION 
 			return true;

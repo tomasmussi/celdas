@@ -91,10 +91,19 @@ public class AutonomusAgent extends AbstractPlayer {
 				teoriaIteracionAnterior.copiarUsos(teoria);
 			}
 		}
+		boolean doAdd = false;
 		if (teoriaMutante != null) {
+			for (Teoria teoria : teorias) {
+				if (teoriaMutante.mismasCondiciones(teoria)) {
+					doAdd = true;
+					break;
+				}
+			}
 			// TODO: DESCOMENTAR CUANDO SE AGREGUEN TEORIAS MUTANTES
-			//nextId++;
-			//teorias.add(teoriaMutante);
+			if (doAdd) {
+				nextId++;
+				teorias.add(teoriaMutante);				
+			}			
 		}
 		if (agregarTeoriaNueva) {
 			teorias.add(teoriaIteracionAnterior);
