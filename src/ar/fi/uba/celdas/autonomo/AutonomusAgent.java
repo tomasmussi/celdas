@@ -46,7 +46,8 @@ public class AutonomusAgent extends AbstractPlayer {
 		// Planificar
 		if (planTransitorio != null) {
 			if (planTransitorio.todaviaSirve(teoriaLocal)) {
-				return planTransitorio.dameAccionPlan();				
+				teoriaIteracionAnterior = planTransitorio.dameTeoria();
+				return teoriaIteracionAnterior.getAccionTeoria();				
 			} else {
 				planTransitorio = null;
 			}		
@@ -54,9 +55,9 @@ public class AutonomusAgent extends AbstractPlayer {
 
 		Planificador plan = new Planificador(teorias, teoriaLocal);
 		if (plan.hayPlan()) {
-			ACTIONS accion = plan.dameAccionPlan();
+			teoriaIteracionAnterior = plan.dameTeoria();
 			planTransitorio = plan;
-			return accion;
+			return teoriaIteracionAnterior.getAccionTeoria();
 		} else if (plan.hayTeoriaUtil()) {
 			return plan.dameAccionTeoriaUtil();
 		}

@@ -131,10 +131,8 @@ public class Planificador {
 		return hayTeoriaUtil;
 	}
 
-	public ACTIONS dameAccionPlan() {
-		ACTIONS accion = plan.get(0).getAccionTeoria();
-		plan.remove(0);
-		return accion;
+	public Teoria dameTeoria() {
+		return plan.remove(0);
 	}
 
 	public ACTIONS dameAccionTeoriaUtil() {
