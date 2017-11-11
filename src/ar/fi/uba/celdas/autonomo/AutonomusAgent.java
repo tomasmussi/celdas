@@ -15,22 +15,31 @@ public class AutonomusAgent extends AbstractPlayer {
 	private Teoria teoriaIteracionAnterior;
 	private Planificador planTransitorio;
 	private Integer nextId;
+	private int accionNula;
 
 	public AutonomusAgent(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 		teorias = new ArrayList<Teoria>();
 		teoriaIteracionAnterior = null;
 		nextId = Integer.valueOf(1); 
 		leerTeorias();
+		accionNula = 0;
 	}
 
 	@Override
 	public ACTIONS act(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 		Perception perception = new Perception(stateObs);
+		if (teoriaIteracionAnterior != null && teoriaIteracionAnterior.efectoNulo(perception) && accionNula < 5) {
+			// Si accion nula vale menos de 5 es tolerable... sino es porque estoy encajonado contra una pared
+			accionNula++;
+			return teoriaIteracionAnterior.getAccionTeoria();
+		}
+		boolean superoIntentos = accionNula == 5;
+		accionNula = 0;
 		Teoria teoriaLocal = new Teoria(perception, nextId);
 		nextId++;
 		if (teoriaIteracionAnterior != null) {
 			teoriaIteracionAnterior.setEfecto(teoriaLocal);
-			agregarTeoria();
+			agregarTeoria(superoIntentos);
 		}
 		teoriaIteracionAnterior = teoriaLocal;
 
@@ -54,14 +63,16 @@ public class AutonomusAgent extends AbstractPlayer {
 		return teoriaLocal.getAccionTeoria();
 	}
 
-	private void agregarTeoria() {
+	private void agregarTeoria(boolean superoIntentos) {
 		teoriaIteracionAnterior.reforzarExitos(); // No mori al usar la teoria
 		teoriaIteracionAnterior.reforzarUsos(); // Use la teoria
 		boolean agregarTeoriaNueva = true;
 		// Si existe teoria igual a la local, reforzar teoria
 		for (Teoria teoria : teorias) {
 			if (teoria.mismasCondiciones(teoriaIteracionAnterior)) {
-				teoria.reforzarExitos();
+				if (!superoIntentos) {
+					teoria.reforzarExitos();					
+				}				
 				teoria.reforzarUsos();
 				agregarTeoriaNueva = false;
 				break; // No deberia encontrar mas teorias iguales, deberian ser unicas

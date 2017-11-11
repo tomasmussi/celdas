@@ -613,5 +613,28 @@ public class Teoria {
 		return (100 * cantidadExito) / cantidadUtilizada;
 	}
 
+	public boolean efectoNulo(Perception perception) {
+		if (this.accion == ACTIONS.ACTION_USE) {
+			return true;
+		}
+		int lowerX = (int) (perception.getAgentPosition().x - 1);
+		int upperX = (int) (perception.getAgentPosition().x + 1);
+		int lowerY = (int) (perception.getAgentPosition().y - 1);
+		int upperY = (int) (perception.getAgentPosition().y + 1);
+		int posFila = 0;
+		int posCol = 0;
+		for (int fila = lowerX; fila <= upperX; fila++) {
+			for (int col = lowerY; col <= upperY; col++) {
+				if (condicionSupuesta[posFila][posCol] != perception.getLevel()[fila][col]) {
+					return false;
+				}
+				posCol++;
+			}
+			posFila++;
+			posCol = 0;
+		}
+		return true;
+	}
+
 
 }
