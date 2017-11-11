@@ -615,7 +615,7 @@ public class Teoria {
 
 	public boolean efectoNulo(Perception perception) {
 		if (this.accion == ACTIONS.ACTION_USE) {
-			return true;
+			return false;
 		}
 		int lowerX = (int) (perception.getAgentPosition().x - 1);
 		int upperX = (int) (perception.getAgentPosition().x + 1);
