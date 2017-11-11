@@ -28,7 +28,7 @@ public class AutonomusAgent extends AbstractPlayer {
 	@Override
 	public ACTIONS act(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 		Perception perception = new Perception(stateObs);
-		if (teoriaIteracionAnterior != null && teoriaIteracionAnterior.efectoNulo(perception) && accionNula < 5) {
+		if (teoriaIteracionAnterior != null && teoriaIteracionAnterior.efectoNulo(perception) && accionNula < 2) {
 			// Si accion nula vale menos de 5 es tolerable... sino es porque estoy encajonado contra una pared
 			accionNula++;
 			return teoriaIteracionAnterior.getAccionTeoria();
@@ -80,34 +80,43 @@ public class AutonomusAgent extends AbstractPlayer {
 			}
 		}
 		Teoria teoriaMutante = null;
+		int cont = 0;
+		int index = -1;
 		for (Teoria teoria : teorias) {
 			// Busco generalizar
-			if (!teoria.mismasCondiciones(teoriaIteracionAnterior) && teoria.esSimilar(teoriaIteracionAnterior)) {
-				// Es similar, pero no la misma
-				teoriaMutante = teoria.generalizarCon(teoriaIteracionAnterior, nextId);
-			}
+			if (teoriaMutante == null) {
+				if (!teoria.mismasCondiciones(teoriaIteracionAnterior) && teoria.esSimilar(teoriaIteracionAnterior)) {
+					// Es similar, pero no la misma
+					teoriaMutante = teoria.generalizarCon(teoriaIteracionAnterior, nextId);
+					index = cont;
+				}
+			}			
 			// Busco mismas condiciones supuestas y accion, pero efectos predichos distintos
 			if (teoria.distintosEfectos(teoriaIteracionAnterior)) {
 				teoria.reforzarUsos();
 				teoriaIteracionAnterior.copiarUsos(teoria);
 			}
+			cont++;
 		}
 		boolean doAdd = false;
 		if (teoriaMutante != null) {
+			/*
 			for (Teoria teoria : teorias) {
 				if (teoriaMutante.mismasCondiciones(teoria)) {
 					doAdd = true;
 					break;
 				}
-			}
+			}*/
 			// TODO: DESCOMENTAR CUANDO SE AGREGUEN TEORIAS MUTANTES
-			if (doAdd) {
-				nextId++;
-				teorias.add(teoriaMutante);				
-			}			
-		}
-		if (agregarTeoriaNueva) {
+			nextId++;
+			teorias.add(teoriaMutante);
+			teorias.remove(index);
+			
+		} else {
 			teorias.add(teoriaIteracionAnterior);
+		}
+		if (agregarTeoriaNueva && !doAdd) {
+			
 		}
 	}
 	

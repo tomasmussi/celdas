@@ -150,6 +150,9 @@ public class Teoria {
 	}
 	
 	public void setEfecto(Perception perception) {
+		if (posicionAgente == null) {
+			return;
+		}
 		int lowerX = (int) (posicionAgente.x - 1);
 		int upperX = (int) (posicionAgente.x + 1);
 		int lowerY = (int) (posicionAgente.y - 1);
@@ -186,8 +189,10 @@ public class Teoria {
 		int dif = 0;
 		for (int f = 0; f < teoria1.length; f++) {
 			for (int c = 0; c < teoria1[f].length; c++) {
-				if (f == 1 || c == 1){
-					continue;
+				if (f == 1 || c == 1) {
+					if (teoria1[f][c] != teoria2[f][c]) {
+						return 0;
+					}
 				}
 				if (teoria1[f][c] != teoria2[f][c]) {
 					dif++;
@@ -277,12 +282,12 @@ public class Teoria {
 			return false;
 		}
 		int csDiferencias = compararArraysEsquinas(this.condicionSupuesta, otra.condicionSupuesta);
-		if (csDiferencias == 1) {
+		if (csDiferencias == 1 && mismoEfectoPredicho(otra)) {
 			// Diferencia 1 bloque, son similares => heuristica EXCLUSION 
 			return true;
 		}
 		int epSimilares = compararArraysEsquinas(this.efectoPredicho, otra.efectoPredicho);
-		if (epSimilares == 1) {
+		if (epSimilares == 1 && mismasCondicionesSupuestas(otra)) {
 			// Diferencia 1 bloque, son similares => heuristica EXCLUSION 
 			return true;
 		}
@@ -297,6 +302,7 @@ public class Teoria {
 			return null;
 		}
 		Teoria mutante = new Teoria(nextId);
+		mutante.accion = this.accion;
 		mutante.accion = this.accion;
 		mutante.tieneLlave = this.tieneLlave;
 		mutante.cantidadExito = this.cantidadExito;
@@ -313,11 +319,24 @@ public class Teoria {
 		// Se que se diferencian en CS o EP
 		boolean cs = false;
 		boolean ep = false;
+		boolean isNotCs = false;
 		for (int f = 0; f < this.condicionSupuesta.length; f++) {
 			for (int c = 0; c < this.condicionSupuesta[f].length; c++) {
-				if (this.condicionSupuesta[f][c] != teoriaIteracionAnterior.condicionSupuesta[f][c]) {
+				if (f == 1 || c == 1) {
+					if (this.condicionSupuesta[f][c] != teoriaIteracionAnterior.condicionSupuesta[f][c]) {
+						isNotCs = true;
+					}
+				}
+				if (this.condicionSupuesta[f][c] != teoriaIteracionAnterior.condicionSupuesta[f][c] && !isNotCs) {
 					mutante.condicionSupuesta[f][c] = '?';
 					cs = true;
+				}
+			}
+		}
+		if (isNotCs) {
+			for (int f = 0; f < this.condicionSupuesta.length; f++) {
+				for (int c = 0; c < this.condicionSupuesta[f].length; c++) {
+					mutante.condicionSupuesta[f][c] = this.condicionSupuesta[f][c];
 				}
 			}
 		}
@@ -326,6 +345,9 @@ public class Teoria {
 		}
 		for (int f = 0; f < this.efectoPredicho.length; f++) {
 			for (int c = 0; c < this.efectoPredicho[f].length; c++) {
+				if (f == 1 || c == 1) {
+					continue;
+				}
 				if (this.efectoPredicho[f][c] != teoriaIteracionAnterior.efectoPredicho[f][c]) {
 					mutante.efectoPredicho[f][c] = '?';
 					ep = true;
