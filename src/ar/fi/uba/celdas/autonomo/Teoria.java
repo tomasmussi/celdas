@@ -281,7 +281,7 @@ public class Teoria {
 			// Diferencia 1 bloque, son similares => heuristica EXCLUSION 
 			return true;
 		}
-		int epSimilares = compararArraysEsquinas(this.condicionSupuesta, otra.condicionSupuesta);
+		int epSimilares = compararArraysEsquinas(this.efectoPredicho, otra.efectoPredicho);
 		if (epSimilares == 1) {
 			// Diferencia 1 bloque, son similares => heuristica EXCLUSION 
 			return true;
