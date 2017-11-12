@@ -16,6 +16,7 @@ public class AutonomusAgent extends AbstractPlayer {
 	private Planificador planTransitorio;
 	private Integer nextId;
 	private int accionNula;
+	private static final int MAX_INTENTOS = 2;
 
 	public AutonomusAgent(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 		teorias = new ArrayList<Teoria>();
@@ -28,12 +29,12 @@ public class AutonomusAgent extends AbstractPlayer {
 	@Override
 	public ACTIONS act(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 		Perception perception = new Perception(stateObs);
-		if (teoriaIteracionAnterior != null && teoriaIteracionAnterior.efectoNulo(perception) && accionNula < 2) {
-			// Si accion nula vale menos de 5 es tolerable... sino es porque estoy encajonado contra una pared
+		if (teoriaIteracionAnterior != null && teoriaIteracionAnterior.efectoNulo(perception) && accionNula < MAX_INTENTOS) {
+			// Si accion nula vale menos de 2 es tolerable... sino es porque estoy encajonado contra una pared
 			accionNula++;
 			return teoriaIteracionAnterior.getAccionTeoria();
 		}
-		boolean superoIntentos = accionNula == 5;
+		boolean superoIntentos = accionNula == MAX_INTENTOS;
 		accionNula = 0;
 		Teoria teoriaLocal = new Teoria(perception, nextId);
 		nextId++;
@@ -112,7 +113,7 @@ public class AutonomusAgent extends AbstractPlayer {
 			teorias.add(teoriaMutante);
 			teorias.remove(index);
 			
-		} else {
+		} else if (agregarTeoriaNueva) {
 			teorias.add(teoriaIteracionAnterior);
 		}
 		if (agregarTeoriaNueva && !doAdd) {
