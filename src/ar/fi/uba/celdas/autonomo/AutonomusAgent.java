@@ -16,6 +16,7 @@ public class AutonomusAgent extends AbstractPlayer {
 	private Planificador planTransitorio;
 	private Integer nextId;
 	private int accionNula;
+	private static final int MAX_INTENTOS = 2;
 
 	public AutonomusAgent(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 		teorias = new ArrayList<Teoria>();
@@ -28,12 +29,12 @@ public class AutonomusAgent extends AbstractPlayer {
 	@Override
 	public ACTIONS act(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 		Perception perception = new Perception(stateObs);
-		if (teoriaIteracionAnterior != null && teoriaIteracionAnterior.efectoNulo(perception) && accionNula < 5) {
-			// Si accion nula vale menos de 5 es tolerable... sino es porque estoy encajonado contra una pared
+		if (teoriaIteracionAnterior != null && teoriaIteracionAnterior.efectoNulo(perception) && accionNula < MAX_INTENTOS) {
+			// Si accion nula vale menos de 2 es tolerable... sino es porque estoy encajonado contra una pared
 			accionNula++;
 			return teoriaIteracionAnterior.getAccionTeoria();
 		}
-		boolean superoIntentos = accionNula == 5;
+		boolean superoIntentos = accionNula == MAX_INTENTOS;
 		accionNula = 0;
 		Teoria teoriaLocal = new Teoria(perception, nextId);
 		nextId++;
@@ -46,7 +47,8 @@ public class AutonomusAgent extends AbstractPlayer {
 		// Planificar
 		if (planTransitorio != null) {
 			if (planTransitorio.todaviaSirve(teoriaLocal)) {
-				return planTransitorio.dameAccionPlan();				
+				teoriaIteracionAnterior = planTransitorio.dameTeoria();
+				return teoriaIteracionAnterior.getAccionTeoria();				
 			} else {
 				planTransitorio = null;
 			}		
@@ -54,9 +56,9 @@ public class AutonomusAgent extends AbstractPlayer {
 
 		Planificador plan = new Planificador(teorias, teoriaLocal);
 		if (plan.hayPlan()) {
-			ACTIONS accion = plan.dameAccionPlan();
+			teoriaIteracionAnterior = plan.dameTeoria();
 			planTransitorio = plan;
-			return accion;
+			return teoriaIteracionAnterior.getAccionTeoria();
 		} else if (plan.hayTeoriaUtil()) {
 			return plan.dameAccionTeoriaUtil();
 		}
@@ -79,25 +81,43 @@ public class AutonomusAgent extends AbstractPlayer {
 			}
 		}
 		Teoria teoriaMutante = null;
+		int cont = 0;
+		int index = -1;
 		for (Teoria teoria : teorias) {
 			// Busco generalizar
-			if (!teoria.mismasCondiciones(teoriaIteracionAnterior) && teoria.esSimilar(teoriaIteracionAnterior)) {
-				// Es similar, pero no la misma
-				teoriaMutante = teoria.generalizarCon(teoriaIteracionAnterior, nextId);
-			}
+			if (teoriaMutante == null) {
+				if (!teoria.mismasCondiciones(teoriaIteracionAnterior) && teoria.esSimilar(teoriaIteracionAnterior)) {
+					// Es similar, pero no la misma
+					teoriaMutante = teoria.generalizarCon(teoriaIteracionAnterior, nextId);
+					index = cont;
+				}
+			}			
 			// Busco mismas condiciones supuestas y accion, pero efectos predichos distintos
 			if (teoria.distintosEfectos(teoriaIteracionAnterior)) {
 				teoria.reforzarUsos();
 				teoriaIteracionAnterior.copiarUsos(teoria);
 			}
+			cont++;
 		}
+		boolean doAdd = false;
 		if (teoriaMutante != null) {
+			/*
+			for (Teoria teoria : teorias) {
+				if (teoriaMutante.mismasCondiciones(teoria)) {
+					doAdd = true;
+					break;
+				}
+			}*/
 			// TODO: DESCOMENTAR CUANDO SE AGREGUEN TEORIAS MUTANTES
-			//nextId++;
-			//teorias.add(teoriaMutante);
-		}
-		if (agregarTeoriaNueva) {
+			nextId++;
+			teorias.add(teoriaMutante);
+			teorias.remove(index);
+			
+		} else if (agregarTeoriaNueva) {
 			teorias.add(teoriaIteracionAnterior);
+		}
+		if (agregarTeoriaNueva && !doAdd) {
+			
 		}
 	}
 	
