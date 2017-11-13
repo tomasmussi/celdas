@@ -1,7 +1,9 @@
 package ar.fi.uba.celdas.autonomo;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.PriorityQueue;
 
 import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
@@ -17,6 +19,7 @@ public class AutonomusAgent extends AbstractPlayer {
 	private Integer nextId;
 	private int accionNula;
 	private static final int MAX_INTENTOS = 2;
+	private static final int CUPOS = 1000;
 
 	public AutonomusAgent(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 		teorias = new ArrayList<Teoria>();
@@ -139,7 +142,32 @@ public class AutonomusAgent extends AbstractPlayer {
 	}
 	
 	private void persistirTeorias() {
-		ParserTeorias.persistirTeorias(teorias);		
+		if (teorias.size() <= CUPOS) {
+			ParserTeorias.persistirTeorias(teorias);
+			return;
+		}
+		List<Teoria> teoriasPersistir = new ArrayList<Teoria>();
+		PriorityQueue<Teoria> colaTeorias = new PriorityQueue<Teoria>(new Comparator<Teoria>() {
+			@Override
+			public int compare(Teoria o1, Teoria o2) {
+				return o2.cociente() - o1.cociente();
+			}
+		});
+		int cont = 0;
+		for (Teoria teoria : teorias) {
+			if (teoria.utilidad() >= 40) {
+				teoriasPersistir.add(teoria);
+				cont++;
+			} else {
+				colaTeorias.add(teoria);
+			}
+		}
+		while (!colaTeorias.isEmpty() && cont < CUPOS) {
+			Teoria t = colaTeorias.poll();
+			teoriasPersistir.add(t);
+			cont++;
+		}
+		ParserTeorias.persistirTeorias(teoriasPersistir);		
 	}
 
 
