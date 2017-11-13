@@ -238,33 +238,6 @@ public class Teoria {
 		}
 		return true;
 	}
-	
-
-	/**
-	 * Una teoria es mas generica que otra si su condicion supuesta es mas 
-	 * generica que otra 
-	 * */
-	public boolean esMasGenericaQue(Teoria otra) {
-		if (this.tieneLlave != otra.tieneLlave) {
-			return false;
-		}
-		int estaTeoria = 0;
-		int otraTeoria = 0;
-		for (int f = 0; f < condicionSupuesta.length; f++) {
-			for (int c = 0; c < condicionSupuesta[f].length; c++) {
-				if (condicionSupuesta[f][c] == '?' && otra.condicionSupuesta[f][c] != '?') {
-					estaTeoria++;
-				} else if (otra.condicionSupuesta[f][c] == '?' && condicionSupuesta[f][c] != '?') {
-					otraTeoria++;
-				} else {
-					if (condicionSupuesta[f][c] != otra.condicionSupuesta[f][c]) {
-						return false;
-					}
-				}
-			}
-		}
-		return estaTeoria > otraTeoria;
-	}
 
 	/**
 	 * Una teoria es similar a otra si:
@@ -368,65 +341,6 @@ public class Teoria {
 		this.cantidadExito++;
 	}
 	
-	private int getFilaCol(char filaCol) {
-		switch (this.accion) {
-		case ACTION_DOWN:
-			if (filaCol == 'i') {
-				return 1;
-			} else {
-				return 2;
-			}
-		case ACTION_UP:
-			if (filaCol == 'i') {
-				return 1;
-			} else {
-				return 0;
-			}
-		case ACTION_LEFT:
-			if (filaCol == 'i') {
-				return 0;
-			} else {
-				return 1;
-			}
-		case ACTION_RIGHT:
-			if (filaCol == 'i') {
-				return 2;
-			} else {
-				return 1;
-			}
-		case ACTION_USE:
-			if (orientacion == ACTIONS.ACTION_DOWN) {
-				if (filaCol == 'i') {
-					return 1;
-				} else {
-					return 2;
-				}
-			} else if (orientacion == ACTIONS.ACTION_UP) {
-				if (filaCol == 'i') {
-					return 1;
-				} else {
-					return 0;
-				}
-			} else if (orientacion == ACTIONS.ACTION_LEFT) {
-				if (filaCol == 'i') {
-					return 0;
-				} else {
-					return 1;
-				}
-			} else if (orientacion == ACTIONS.ACTION_RIGHT) {
-				if (filaCol == 'i') {
-					return 2;
-				} else {
-					return 1;
-				}
-			}
-			break;
-		default:
-			break;
-		}
-		return 0;
-	}
-	
 	/**
 	 * Evalua utilidad de esta teoria:
 	 * 100 => tengo llave y entro a la puerta
@@ -437,9 +351,6 @@ public class Teoria {
 	 * 0 => muero
 	 * */
 	public int utilidad() {
-		int i,j;
-		i = getFilaCol('i');
-		j = getFilaCol('j');
 		switch (this.accion) {
 		case ACTION_DOWN:
 			if (this.tieneLlave && condicionSupuesta[2][1] == 'g') {
