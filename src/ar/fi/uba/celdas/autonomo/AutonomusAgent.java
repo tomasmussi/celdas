@@ -19,7 +19,7 @@ public class AutonomusAgent extends AbstractPlayer {
 	private Integer nextId;
 	private int accionNula;
 	private static final int MAX_INTENTOS = 2;
-	private static final int CUPOS = 1000;
+	private static final int CUPOS = 1500;
 
 	public AutonomusAgent(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 		teorias = new ArrayList<Teoria>();
@@ -126,6 +126,8 @@ public class AutonomusAgent extends AbstractPlayer {
 	
 	@Override
 	public void result(StateObservation stateObs, ElapsedCpuTimer elapsedCpuTimer) {
+		// stateObs.getGameWinner()
+		// stateObs.getGameScore()
 		Perception perception = new Perception(stateObs, true);
 		if (teoriaIteracionAnterior != null) {
 			teoriaIteracionAnterior.setEfecto(perception);
@@ -138,7 +140,8 @@ public class AutonomusAgent extends AbstractPlayer {
 		this.teorias = ParserTeorias.leerTeorias();
 		if (!teorias.isEmpty()) {
 			nextId = teorias.get(teorias.size() - 1).getId() + 1;			
-		}		
+		}
+		System.out.println("Teorias leidas: " + teorias.size());		
 	}
 	
 	private void persistirTeorias() {
@@ -153,19 +156,16 @@ public class AutonomusAgent extends AbstractPlayer {
 				return o2.cociente() - o1.cociente();
 			}
 		});
-		int cont = 0;
 		for (Teoria teoria : teorias) {
 			if (teoria.utilidad() >= 40) {
 				teoriasPersistir.add(teoria);
-				cont++;
 			} else {
 				colaTeorias.add(teoria);
 			}
 		}
-		while (!colaTeorias.isEmpty() && cont < CUPOS) {
+		while (!colaTeorias.isEmpty() && teoriasPersistir.size() < CUPOS) {
 			Teoria t = colaTeorias.poll();
 			teoriasPersistir.add(t);
-			cont++;
 		}
 		ParserTeorias.persistirTeorias(teoriasPersistir);		
 	}
