@@ -102,16 +102,7 @@ public class AutonomusAgent extends AbstractPlayer {
 			}
 			cont++;
 		}
-		boolean doAdd = false;
 		if (teoriaMutante != null) {
-			/*
-			for (Teoria teoria : teorias) {
-				if (teoriaMutante.mismasCondiciones(teoria)) {
-					doAdd = true;
-					break;
-				}
-			}*/
-			// TODO: DESCOMENTAR CUANDO SE AGREGUEN TEORIAS MUTANTES
 			nextId++;
 			teorias.add(teoriaMutante);
 			teorias.remove(index);
@@ -119,15 +110,10 @@ public class AutonomusAgent extends AbstractPlayer {
 		} else if (agregarTeoriaNueva) {
 			teorias.add(teoriaIteracionAnterior);
 		}
-		if (agregarTeoriaNueva && !doAdd) {
-			
-		}
 	}
 	
 	@Override
 	public void result(StateObservation stateObs, ElapsedCpuTimer elapsedCpuTimer) {
-		// stateObs.getGameWinner()
-		// stateObs.getGameScore()
 		Perception perception = new Perception(stateObs, true);
 		if (teoriaIteracionAnterior != null) {
 			teoriaIteracionAnterior.setEfecto(perception);

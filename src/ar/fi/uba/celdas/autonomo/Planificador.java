@@ -113,8 +113,6 @@ public class Planificador {
 						Integer id = mapaInvertido.get(vertex);
 						if (id != null) {
 							plan.add(mapaTeorias.get(id));						
-						} else {
-							// plan.add(actual);
 						}
 					}
 				}				
