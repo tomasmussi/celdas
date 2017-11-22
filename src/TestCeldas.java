@@ -41,8 +41,8 @@ public class TestCeldas
 		
 
 		// 2. This plays a game in a level by the controller.
-		ArcadeMachine.runOneGame(game, level1, visuals, celdasAgent, recordActionsFile, seed, 0);
-		//ArcadeMachine.runGames(game, new String[]{level1}, 100, celdasAgent, null);
+		//ArcadeMachine.runOneGame(game, level1, visuals, celdasAgent, recordActionsFile, seed, 0);
+		ArcadeMachine.runGames(game, new String[]{level1}, 10, celdasAgent, null);
 		
 		//
 

@@ -1,7 +1,9 @@
 package ar.fi.uba.celdas.autonomo;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.PriorityQueue;
 
 import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
@@ -17,6 +19,7 @@ public class AutonomusAgent extends AbstractPlayer {
 	private Integer nextId;
 	private int accionNula;
 	private static final int MAX_INTENTOS = 2;
+	private static final int CUPOS = 1500;
 
 	public AutonomusAgent(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 		teorias = new ArrayList<Teoria>();
@@ -123,6 +126,8 @@ public class AutonomusAgent extends AbstractPlayer {
 	
 	@Override
 	public void result(StateObservation stateObs, ElapsedCpuTimer elapsedCpuTimer) {
+		// stateObs.getGameWinner()
+		// stateObs.getGameScore()
 		Perception perception = new Perception(stateObs, true);
 		if (teoriaIteracionAnterior != null) {
 			teoriaIteracionAnterior.setEfecto(perception);
@@ -135,11 +140,34 @@ public class AutonomusAgent extends AbstractPlayer {
 		this.teorias = ParserTeorias.leerTeorias();
 		if (!teorias.isEmpty()) {
 			nextId = teorias.get(teorias.size() - 1).getId() + 1;			
-		}		
+		}
+		System.out.println("Teorias leidas: " + teorias.size());		
 	}
 	
 	private void persistirTeorias() {
-		ParserTeorias.persistirTeorias(teorias);		
+		if (teorias.size() <= CUPOS) {
+			ParserTeorias.persistirTeorias(teorias);
+			return;
+		}
+		List<Teoria> teoriasPersistir = new ArrayList<Teoria>();
+		PriorityQueue<Teoria> colaTeorias = new PriorityQueue<Teoria>(new Comparator<Teoria>() {
+			@Override
+			public int compare(Teoria o1, Teoria o2) {
+				return o2.cociente() - o1.cociente();
+			}
+		});
+		for (Teoria teoria : teorias) {
+			if (teoria.utilidad() >= 40) {
+				teoriasPersistir.add(teoria);
+			} else {
+				colaTeorias.add(teoria);
+			}
+		}
+		while (!colaTeorias.isEmpty() && teoriasPersistir.size() < CUPOS) {
+			Teoria t = colaTeorias.poll();
+			teoriasPersistir.add(t);
+		}
+		ParserTeorias.persistirTeorias(teoriasPersistir);		
 	}
 
 
